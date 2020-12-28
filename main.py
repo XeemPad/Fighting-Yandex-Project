@@ -1,14 +1,21 @@
 # This file contains code of game menu
 import pygame
 from image_functions import load_image, text_to_surface
+from object_classes import Button
 
 
+# Константы:
 GAME_NAME = 'Kind of Fighting'
 WINDOW_WIDTH, WINDOW_HEIGHT = 1024, 576
 FPS = 40
 
 ICON_FILE_DIRECTORY = 'data/icon.ico'
 MENU_BACKGROUND_DIRECTORY = 'data/menu_background.png'
+
+BUTTON_TEXT_COLOR = (51, 255, 51)
+BUTTON_TEXT_SIZE = 70
+BUTTONS_SIZE = (200, 80)
+TITLE_TEXT_COLOR = (255, 255, 0)
 
 
 def terminate():
@@ -23,7 +30,11 @@ pygame.display.set_caption('Fighting')
 pygame.display.set_icon(pygame.image.load(ICON_FILE_DIRECTORY))
 
 
-def game_menu_launch():
+def start_game():
+    pass
+
+
+def game_menu():
     # Установка фона в меню:
     try:
         bg_image = load_image(MENU_BACKGROUND_DIRECTORY)
@@ -35,21 +46,44 @@ def game_menu_launch():
 
     # Установка названия игры в меню:
     font_size = 96
-    title, title_width, title_height = text_to_surface(GAME_NAME, (255, 255, 0),
-                                                       font_size=font_size)
+    title, title_width, title_height = text_to_surface(GAME_NAME, TITLE_TEXT_COLOR,
+                                                       font_size=font_size, text_shadow=True)
     title_x, title_y = (WINDOW_WIDTH - title_width) // 2, (WINDOW_HEIGHT - title_height) // 10
-    shadow_for_title, shadow_width, shadow_height = text_to_surface(GAME_NAME, (0, 0, 0),
-                                                                    font_size=font_size)
-    shadow_x, shadow_y = title_x + 4, title_y + 4
-    screen.blit(shadow_for_title, (shadow_x, shadow_y))  # Рисуем тень
     screen.blit(title, (title_x, title_y))  # А теперь и само название
+
+    # Создание кнопок:
+    buttons_y = WINDOW_HEIGHT // 5 * 2
+    buttons_distance = 30
+    btn_w, btn_h = BUTTONS_SIZE
+    buttons = []
+    # Кнопка запуска игры:
+    play_text = text_to_surface('Играть', BUTTON_TEXT_COLOR, BUTTON_TEXT_SIZE,
+                                text_shadow=True, shadow_shift=4)[0]
+    play_btn = Button(play_text, width=btn_w, height=btn_h, function=start_game)
+    play_btn.set_pos(((WINDOW_WIDTH - btn_w) // 2, buttons_y))
+    buttons.append(play_btn)
+    # Кнопка выхода:
+    exit_text = text_to_surface('Выйти', BUTTON_TEXT_COLOR, BUTTON_TEXT_SIZE,
+                                text_shadow=True, shadow_shift=4)[0]
+    exit_btn = Button(exit_text, width=btn_w, height=btn_h, function=terminate)
+    exit_btn.set_pos(((WINDOW_WIDTH - btn_w) // 2, buttons_y + btn_h + buttons_distance))
+    buttons.append(exit_btn)
+
+    # Отрисовка кнопок:
+    for btn in buttons:
+        btn_surface = btn.get_surface()
+        btn_pos = btn.get_pos()
+        screen.blit(btn_surface, btn_pos)
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                for btn in buttons:
+                    btn.check_click_position(event.pos)
         pygame.display.flip()
         clock.tick(FPS)
 
 
-game_menu_launch()
+game_menu()

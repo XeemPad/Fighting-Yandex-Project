@@ -1,6 +1,10 @@
 import pygame
 
 
+SHADOW_SHIFT = 4
+SHADOW_COLOR = (0, 0, 0)
+
+
 def load_image(directory_name, colorkey=None):
     import os
 
@@ -17,9 +21,17 @@ def load_image(directory_name, colorkey=None):
     return image
 
 
-def text_to_surface(text, text_color=(255, 255, 255), font_size=50):
+def text_to_surface(text, text_color=(255, 255, 255), font_size=50, text_shadow=False,
+                    shadow_shift=SHADOW_SHIFT):
     font = pygame.font.Font(None, font_size)
     text_surface = font.render(text, True, text_color)
     text_w = text_surface.get_width()
     text_h = text_surface.get_height()
-    return text_surface, text_w, text_h
+    if text_shadow:
+        shadow_surface = font.render(text, True, SHADOW_COLOR)
+        result_surface = pygame.Surface((text_w + shadow_shift, text_h + shadow_shift), pygame.SRCALPHA)
+        result_surface.blit(shadow_surface, (shadow_shift, shadow_shift))
+    else:
+        result_surface = pygame.Surface((text_w, text_h), pygame.SRCALPHA)
+    result_surface.blit(text_surface, (0, 0))
+    return result_surface, text_w, text_h

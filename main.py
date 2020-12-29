@@ -11,11 +11,14 @@ FPS = 40
 
 ICON_FILE_DIRECTORY = 'data/icon.ico'
 MENU_BACKGROUND_DIRECTORY = 'data/menu_background.png'
+MENU_MUSIC_DIRECTORY = 'data/sounds/menu_music.mp3'
 
 BUTTON_TEXT_COLOR = (51, 255, 51)
 BUTTON_TEXT_SIZE = 70
 BUTTONS_SIZE = (200, 80)
 TITLE_TEXT_COLOR = (255, 255, 0)
+
+music_volume = 0.4
 
 
 def terminate():
@@ -35,6 +38,10 @@ def start_game():
 
 
 def game_menu():
+    # Загрузка музыки для главного меню:
+    pygame.mixer.music.load(MENU_MUSIC_DIRECTORY)
+    pygame.mixer.music.set_volume(music_volume)
+    pygame.mixer.music.play(-1)
     # Установка фона в меню:
     try:
         bg_image = load_image(MENU_BACKGROUND_DIRECTORY)

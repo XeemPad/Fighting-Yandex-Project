@@ -79,9 +79,19 @@ def game_menu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            if event.type == pygame.MOUSEMOTION:
+                for btn in buttons:
+                    if btn.check_mouse_position(event.pos):
+                        btn.set_under_mouse_effect()
+                    else:
+                        btn.set_under_mouse_effect(False)
+                    # Перерисовка нового вида кнопки:
+                    screen.blit(btn.get_surface(), btn.get_pos())
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for btn in buttons:
-                    btn.check_click_position(event.pos)
+                    if btn.check_mouse_position(event.pos):
+                        btn.trigger()
+
         pygame.display.flip()
         clock.tick(FPS)
 

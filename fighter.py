@@ -27,6 +27,7 @@ class Fighter():
                        pygame.image.load(f'data/img/characters/{self.character}/pygame_left_6.png')]
 
         self.stayOn = pygame.image.load(f'data/img/characters/{self.character}/stay.png')
+        self.sitOn = pygame.image.load(f'data/img/characters/{self.character}/sit.png')
 
     def beat(self):
         pass

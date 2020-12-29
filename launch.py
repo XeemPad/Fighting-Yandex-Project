@@ -2,7 +2,6 @@ import pygame
 from fighter import Fighter
 from pygame.mixer import music
 
-
 if __name__ == '__main__':
     pygame.init()
     size = win_width, win_height = 1280, 720
@@ -14,15 +13,15 @@ if __name__ == '__main__':
     location = pygame.Surface(size)
     location.blit(bg, (0, 0))
 
-    music.load('data/sounds/bg_music/music_one.mp3')
+    music.load('data/sounds/bg_music/music_two.mp3')
     music.play(-1)
 
-
-    fighterOne = Fighter('trump')
+    fighterOne = Fighter('scorpion')
     print(fighterOne.health, fighterOne.speed)
     isJumpOne = False
     jumpCountOne = 10
     isJumpOne = False
+    isSitOne = False
     jumpCountOne = 10
     leftOne = False
     rightOne = False
@@ -33,6 +32,7 @@ if __name__ == '__main__':
     isJumpTwo = False
     jumpCountTwo = 10
     isJumpTwo = False
+    isSitTwo = False
     jumpCountTwo = 10
     leftTwo = False
     rightTwo = False
@@ -47,19 +47,24 @@ if __name__ == '__main__':
     def drawWindow():
         global animIndexOne
         global animIndexTwo
+        global isSitOne
 
         window.blit(location, (0, 0))
 
-        if animIndexOne + 1 >= 30:
-            animIndexOne = 0
-        if leftOne:
-            window.blit(fighterOne.goLeft[animIndexOne // 5], (fighterOne.x, fighterOne.y))
-            animIndexOne += 1
-        elif rightOne:
-            window.blit(fighterOne.goRight[animIndexOne // 5], (fighterOne.x, fighterOne.y))
-            animIndexOne += 1
+        if isSitOne:
+            window.blit(fighterOne.sitOn, (fighterOne.x, fighterOne.y))
+            isSitOne = False
         else:
-            window.blit(fighterOne.stayOn, (fighterOne.x, fighterOne.y))
+            if animIndexOne + 1 >= 30:
+                animIndexOne = 0
+            if leftOne:
+                window.blit(fighterOne.goLeft[animIndexOne // 5], (fighterOne.x, fighterOne.y))
+                animIndexOne += 1
+            elif rightOne:
+                window.blit(fighterOne.goRight[animIndexOne // 5], (fighterOne.x, fighterOne.y))
+                animIndexOne += 1
+            else:
+                window.blit(fighterOne.stayOn, (fighterOne.x, fighterOne.y))
 
         if animIndexTwo + 1 >= 30:
             animIndexTwo = 0
@@ -116,6 +121,10 @@ if __name__ == '__main__':
             else:
                 isJumpOne = False
                 jumpCountOne = 10
+
+        if isSitOne is False:
+            if keys[pygame.K_s]:
+                isSitOne = True
 
         if keys[pygame.K_LEFT] and fighterTwo.x >= fighterTwo.speed:
             fighterTwo.x -= fighterTwo.speed

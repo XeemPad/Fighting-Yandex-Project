@@ -18,14 +18,12 @@ CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.
            {LEFT: pygame.K_LEFT, RIGHT: pygame.K_RIGHT, DUCK: pygame.K_DOWN, JUMP: pygame.K_UP,
             HIT: pygame.K_1, KICK: pygame.K_2, BLOCK: pygame.K_3}]  # Управление второго игрока
 
-music_volume = 0.4
+music_volume = 0.05
 
 
 # Считываем информацию из конфига:
 with open(CONFIGURATION_FILE_DIRECTORY) as cfg:
     fighter1, fighter2, bg = (line for line in cfg.read().split('\n') if line.strip())
-first_fighter = Fighter(fighter1)
-second_fighter = Fighter(fighter2)
 
 
 # Инициализация:
@@ -34,21 +32,33 @@ size = WINDOW_WIDTH, WINDOW_HEIGHT
 window = pygame.display.set_mode(size)
 pygame.display.set_caption(GAME_NAME)
 pygame.display.set_icon(pygame.image.load(ICON_FILE_DIRECTORY))
+clock = pygame.time.Clock()
 
-# Отрисовка фона:
+# Загрузка фона:
 background = pygame.image.load(BACKGROUND_DIRECTORIES[bg])
-location = pygame.Surface(size)
-location.blit(background, (0, 0))
+location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Музыка:
 music.load(MUSIC_DIRECTORIES[0])
+music.set_volume(music_volume)
 music.play(-1)
+
+# Группы спрайтов:
+all_sprites = pygame.sprite.Group()
+
+
+# Создание персонажей:
+fighters = [Fighter(all_sprites, fighter1), Fighter(all_sprites, fighter2)]
 
 
 running = True
 while running:
+    window.blit(location, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
 
-terminate()
+    all_sprites.update()
+    all_sprites.draw(window)
+    pygame.display.flip()
+    clock.tick(FPS)

@@ -83,21 +83,22 @@ class Button:
                                                   (self.height - self.text_height) // 2))
 
 
-class Fighter:
-    def __init__(self, character):
+class Fighter(pygame.sprite.Sprite):
+    def __init__(self, all_sprites, character):
+        super().__init__(all_sprites)
+
         self.speed = 7
         self.character = character
         self.health = 100
 
-        self.walk = [pygame.image.load(f'data/sprites/{self.character}/walk1.png'),
-                     pygame.image.load(f'data/sprites/{self.character}/walk2.png'),
-                     pygame.image.load(f'data/sprites/{self.character}/walk3.png'),
-                     pygame.image.load(f'data/sprites/{self.character}/walk4.png'),
-                     pygame.image.load(f'data/sprites/{self.character}/walk5.png'),
-                     pygame.image.load(f'data/sprites/{self.character}/walk6.png'),
-                     pygame.image.load(f'data/sprites/{self.character}/walk7.png'),
-                     pygame.image.load(f'data/sprites/{self.character}/walk8.png'),
-                     pygame.image.load(f'data/sprites/{self.character}/walk9.png')]
+        self.image = pygame.image.load(f'data/sprites/{self.character}/stay.png')
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        
+        self.animation_delay = 5  # Задержка перед следующей картинкой анимации
+        self.frames_count = 0
+
+        self.is_idle = True
 
         self.idle = [pygame.image.load(f'data/sprites/{self.character}/idle1.png'),
                      pygame.image.load(f'data/sprites/{self.character}/idle2.png'),
@@ -108,7 +109,39 @@ class Fighter:
                      pygame.image.load(f'data/sprites/{self.character}/idle7.png'),
                      pygame.image.load(f'data/sprites/{self.character}/idle8.png'),
                      pygame.image.load(f'data/sprites/{self.character}/idle9.png')]
+        self.idle_index = 0  # Здесь и далее: указывает на текущий этап анимации данного действия
+
+        self.walk = [pygame.image.load(f'data/sprites/{self.character}/walk1.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk2.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk3.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk4.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk5.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk6.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk7.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk8.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk9.png')]
+        self.walk_index = 0
 
         self.duck = [pygame.image.load(f'data/sprites/{self.character}/duck1.png'),
                      pygame.image.load(f'data/sprites/{self.character}/duck2.png'),
                      pygame.image.load(f'data/sprites/{self.character}/duck3.png')]
+        self.duck_index = 0
+
+        self.jump = [pygame.image.load(f'data/sprites/{self.character}/jump1.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/jump2.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/jump3.png')]
+        self.duck_index = 0
+
+
+    def update_mask(self):
+        self.rect = self.image.get_rect()
+        # вычисляем маску:
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self):
+        self.frames_count += 1
+        if self.is_idle:
+            if self.frames_count % self.animation_delay == 0:
+                self.image = self.idle[self.idle_index]
+                self.idle_index = (self.idle_index + 1) % len(self.idle)
+

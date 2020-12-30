@@ -9,7 +9,7 @@ from main import terminate, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, WINDOW
 # Константы:
 FPS = 40
 
-BACKGROUND_DIRECTORIES = {'background1': 'background1.jpg'}
+BACKGROUND_DIRECTORIES = {'background1': 'data/backgrounds/background1.jpg'}
 MUSIC_DIRECTORIES = ['data/sounds/bg_music/music_one.mp3', 'data/sounds/bg_music/music_two.mp3']
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
@@ -23,7 +23,7 @@ music_volume = 0.4
 
 # Считываем информацию из конфига:
 with open(CONFIGURATION_FILE_DIRECTORY) as cfg:
-    fighter1, fighter2, bg = cfg.readlines()
+    fighter1, fighter2, bg = (line for line in cfg.read().split('\n') if line.strip())
 first_fighter = Fighter(fighter1)
 second_fighter = Fighter(fighter2)
 
@@ -50,6 +50,5 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
-        pygame.MOUSEMOTION
 
 terminate()

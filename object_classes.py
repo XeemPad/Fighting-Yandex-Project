@@ -81,3 +81,7 @@ class Button:
                              (0, 0, self.width, self.height), 1)
             self.surface.blit(self.text_surface, ((self.width - self.text_width) // 2,
                                                   (self.height - self.text_height) // 2))
+
+
+class Fighter:
+    pass

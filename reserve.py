@@ -27,7 +27,7 @@ if __name__ == '__main__':
     rightOne = False
     animIndexOne = 0
 
-    fighterTwo = Fighter('scorpion')
+    fighterTwo = Fighter('obama')
     print(fighterTwo.health, fighterTwo.speed)
     isJumpTwo = False
     jumpCountTwo = 10
@@ -43,19 +43,6 @@ if __name__ == '__main__':
     FPS = 60
     clock = pygame.time.Clock()
 
-    stayIndexOne = 0
-    stayIndexTwo = 0
-
-
-    def stayOnSurfaceOne():
-        global stayIndexOne
-
-        window.blit(location, (0, 0))
-
-        if stayIndexOne + 1 >= 30:
-            stayIndexOne = 0
-        stayIndexOne += 1
-        window.blit(fighterOne.stayOn[animIndexOne // 8], (fighterOne.x, fighterOne.y))
 
     def drawWindow():
         global animIndexOne
@@ -68,34 +55,32 @@ if __name__ == '__main__':
             window.blit(fighterOne.sitOn, (fighterOne.x, fighterOne.y))
             isSitOne = False
         else:
-            if animIndexOne + 1 >= 60:
+            if animIndexOne + 1 >= 30:
                 animIndexOne = 0
             if leftOne:
-                window.blit(fighterOne.goLeft[animIndexOne // 8], (fighterOne.x, fighterOne.y))
+                window.blit(fighterOne.goLeft[animIndexOne // 5], (fighterOne.x, fighterOne.y))
                 animIndexOne += 1
             elif rightOne:
-                window.blit(fighterOne.goRight[animIndexOne // 8], (fighterOne.x, fighterOne.y))
+                window.blit(fighterOne.goRight[animIndexOne // 5], (fighterOne.x, fighterOne.y))
                 animIndexOne += 1
             else:
-                window.blit(fighterOne.stayOn[stayIndexOne // 8], (fighterOne.x, fighterOne.y))
+                window.blit(fighterOne.stayOn, (fighterOne.x, fighterOne.y))
 
-        if animIndexTwo + 1 >= 60:
+        if animIndexTwo + 1 >= 30:
             animIndexTwo = 0
         if leftTwo:
-            window.blit(fighterTwo.goLeft[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+            window.blit(fighterTwo.goLeft[animIndexTwo // 5], (fighterTwo.x, fighterTwo.y))
             animIndexTwo += 1
         elif rightTwo:
-            window.blit(fighterTwo.goRight[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+            window.blit(fighterTwo.goRight[animIndexTwo // 5], (fighterTwo.x, fighterTwo.y))
             animIndexTwo += 1
         else:
-            window.blit(fighterTwo.stayOn[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+            window.blit(fighterTwo.stayOn, (fighterTwo.x, fighterTwo.y))
 
         pygame.display.update()
 
 
     while running:
-
-        stayOnSurfaceOne()
 
         # mixer.music.load('data/sounds/bg_music/mp2.wav')
         # mixer.music.play(-1)

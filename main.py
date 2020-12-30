@@ -1,5 +1,7 @@
 # This file contains code of game menu
 import pygame
+import subprocess
+import sys
 from image_functions import load_image, text_to_surface
 from object_classes import Button
 
@@ -12,11 +14,14 @@ FPS = 40
 ICON_FILE_DIRECTORY = 'data/icon.ico'
 MENU_BACKGROUND_DIRECTORY = 'data/menu_background.png'
 MENU_MUSIC_DIRECTORY = 'data/sounds/menu_music.mp3'
+CONFIGURATION_FILE_DIRECTORY = 'info.txt'
+GAME_LAUNCH_DIRECTORY = 'launch_game.py'
 
 BUTTON_TEXT_COLOR = (51, 255, 51)
 BUTTON_TEXT_SIZE = 70
 BUTTONS_SIZE = (200, 80)
 TITLE_TEXT_COLOR = (255, 255, 0)
+
 
 music_volume = 0.4
 
@@ -34,7 +39,16 @@ pygame.display.set_icon(pygame.image.load(ICON_FILE_DIRECTORY))
 
 
 def start_game():
-    pass
+    # Данные о поле боя:
+    with open(CONFIGURATION_FILE_DIRECTORY, 'w') as cfg:
+        first_fighter = 'scorpion'
+        second_fighter = 'scorpion'
+        background = 'background1'
+        for line in [first_fighter, second_fighter, background]:
+            cfg.write(line + '\n')
+    # Запуск скрипта с игровым процессом:
+    subprocess.Popen([sys.executable, GAME_LAUNCH_DIRECTORY])
+    terminate()
 
 
 def game_menu():

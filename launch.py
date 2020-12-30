@@ -9,7 +9,7 @@ if __name__ == '__main__':
     pygame.display.set_caption('Flex Kombat')
     pygame.display.set_icon(pygame.image.load('data/img/pngguru.com.png'))
 
-    bg = pygame.image.load('data/img/locations/background1.jpg')
+    bg = pygame.transform.scale(pygame.image.load('data/img/locations/background1.jpg'), (win_width, win_height))
     location = pygame.Surface(size)
     location.blit(bg, (0, 0))
 

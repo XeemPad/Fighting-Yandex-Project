@@ -51,6 +51,7 @@ if __name__ == '__main__':
         global animIndexOne
         global animIndexTwo
         global isSitOne
+        global isSitTwo
 
         window.blit(location, (0, 0))
 

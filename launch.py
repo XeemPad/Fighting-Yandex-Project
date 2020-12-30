@@ -26,9 +26,11 @@ if __name__ == '__main__':
     leftOne = False
     rightOne = False
     animIndexOne = 0
+    isBlockOne = False
 
     fighterTwo = Fighter('scorpion')
     print(fighterTwo.health, fighterTwo.speed)
+    fighterTwo.x = win_width - fighterTwo.width
     isJumpTwo = False
     jumpCountTwo = 10
     isJumpTwo = False
@@ -37,6 +39,7 @@ if __name__ == '__main__':
     leftTwo = False
     rightTwo = False
     animIndexTwo = 0
+    isBlockTwo = False
 
     running = True
 
@@ -45,6 +48,39 @@ if __name__ == '__main__':
 
     stayIndexOne = 0
     stayIndexTwo = 0
+
+    punchStandIndexOne = 0
+    punchStandIndexTwo = 0
+
+
+    # def beatHim():
+    #     if isSitOne is False:
+
+    def punchStand():
+        global punchStandIndexOne
+        global punchStandIndexTwo
+
+        window.blit(location, (0, 0))
+
+        if fighterOne.x <= win_width - (fighterOne.width + fighterOne.speed):
+            if punchStandIndexOne <= 5:
+                fighterOne.x += fighterOne.speed
+                window.blit(fighterOne.punchStand[punchStandIndexOne], (fighterOne.x, fighterOne.y))
+        else:
+            if punchStandIndexOne <= 5:
+                window.blit(fighterOne.punchStand[punchStandIndexOne], (fighterOne.x, fighterOne.y))
+        punchStandIndexOne += 1
+
+        if fighterTwo.x <= win_width - (fighterTwo.width + fighterTwo.speed):
+            if punchStandIndexTwo <= 5:
+                fighterTwo.x -= fighterTwo.speed
+                window.blit(fighterTwo.punchStand[punchStandIndexTwo], (fighterTwo.x, fighterTwo.y))
+        else:
+            if punchStandIndexTwo <= 5:
+                window.blit(fighterTwo.punchStand[punchStandIndexTwo], (fighterTwo.x, fighterTwo.y))
+        punchStandIndexTwo += 1
+
+        pygame.display.update()
 
 
     def stayOnSurfaceOne():
@@ -63,12 +99,48 @@ if __name__ == '__main__':
         stayIndexTwo += 1
         window.blit(fighterTwo.stayOn[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
 
+
     def drawWindow():
         global animIndexOne
         global animIndexTwo
         global isSitOne
+        global isSitTwo
+        global isBlockOne
+        global isBlockTwo
 
         window.blit(location, (0, 0))
+
+        if isBlockOne:
+            window.blit(location, (0, 0))
+            window.blit(fighterOne.blockStay[2], (fighterOne.x, fighterOne.y))
+            isBlockOne = False
+        else:
+            if animIndexOne + 1 >= 60:
+                animIndexOne = 0
+            if leftOne:
+                window.blit(fighterOne.goLeft[animIndexOne // 8], (fighterOne.x, fighterOne.y))
+                animIndexOne += 1
+            elif rightOne:
+                window.blit(fighterOne.goRight[animIndexOne // 8], (fighterOne.x, fighterOne.y))
+                animIndexOne += 1
+            else:
+                window.blit(fighterOne.stayOn[stayIndexOne // 8], (fighterOne.x, fighterOne.y))
+
+        if isBlockTwo:
+            window.blit(location, (0, 0))
+            window.blit(fighterTwo.blockStay[2], (fighterTwo.x, fighterTwo.y))
+            isBlockTwo = False
+        else:
+            if animIndexTwo + 1 >= 60:
+                animIndexTwo = 0
+            if leftTwo:
+                window.blit(fighterTwo.goLeft[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+                animIndexTwo += 1
+            elif rightTwo:
+                window.blit(fighterTwo.goRight[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+                animIndexTwo += 1
+            else:
+                window.blit(fighterTwo.stayOn[stayIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
 
         if isSitOne:
             window.blit(fighterOne.sitOn, (fighterOne.x, fighterOne.y))
@@ -85,16 +157,20 @@ if __name__ == '__main__':
             else:
                 window.blit(fighterOne.stayOn[stayIndexOne // 8], (fighterOne.x, fighterOne.y))
 
-        if animIndexTwo + 1 >= 60:
-            animIndexTwo = 0
-        if leftTwo:
-            window.blit(fighterTwo.goLeft[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
-            animIndexTwo += 1
-        elif rightTwo:
-            window.blit(fighterTwo.goRight[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
-            animIndexTwo += 1
+        if isSitTwo:
+            window.blit(fighterTwo.sitOn, (fighterTwo.x, fighterTwo.y))
+            isSitTwo = False
         else:
-            window.blit(fighterTwo.stayOn[stayIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+            if animIndexTwo + 1 >= 60:
+                animIndexTwo = 0
+            if leftTwo:
+                window.blit(fighterTwo.goLeft[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+                animIndexTwo += 1
+            elif rightTwo:
+                window.blit(fighterTwo.goRight[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+                animIndexTwo += 1
+            else:
+                window.blit(fighterTwo.stayOn[stayIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
 
         pygame.display.update()
 
@@ -111,7 +187,7 @@ if __name__ == '__main__':
                 running = False
 
         keys = pygame.key.get_pressed()
-
+        #######################################################################################################################
         if keys[pygame.K_a] and fighterOne.x >= fighterOne.speed:
             fighterOne.x -= fighterOne.speed
             leftOne = True
@@ -124,6 +200,9 @@ if __name__ == '__main__':
             leftOne = False
             rightOne = False
             animIndexOne = 0
+
+        if keys[pygame.K_c]:
+            isBlockOne = True
 
         if isJumpOne is False:
             # if keys[pygame.K_UP] and y >= speed:
@@ -146,7 +225,7 @@ if __name__ == '__main__':
         if isSitOne is False:
             if keys[pygame.K_s]:
                 isSitOne = True
-
+        ################################################################################################################################
         if keys[pygame.K_LEFT] and fighterTwo.x >= fighterTwo.speed:
             fighterTwo.x -= fighterTwo.speed
             leftTwo = True
@@ -159,6 +238,9 @@ if __name__ == '__main__':
             leftTwo = False
             rightTwo = False
             animIndexTwo = 0
+
+        if keys[pygame.K_m]:
+            isBlockTwo = True
 
         if isJumpTwo is False:
             # if keys[pygame.K_UP] and y >= speed:
@@ -177,6 +259,10 @@ if __name__ == '__main__':
             else:
                 isJumpTwo = False
                 jumpCountTwo = 10
+
+        if isSitTwo is False:
+            if keys[pygame.K_DOWN]:
+                isSitTwo = True
 
         drawWindow()
 

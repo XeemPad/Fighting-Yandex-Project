@@ -49,13 +49,19 @@ if __name__ == '__main__':
 
     def stayOnSurfaceOne():
         global stayIndexOne
+        global stayIndexTwo
 
         window.blit(location, (0, 0))
 
-        if stayIndexOne + 1 >= 30:
+        if stayIndexOne + 1 >= 60:
             stayIndexOne = 0
         stayIndexOne += 1
         window.blit(fighterOne.stayOn[animIndexOne // 8], (fighterOne.x, fighterOne.y))
+
+        if stayIndexTwo + 1 >= 60:
+            stayIndexTwo = 0
+        stayIndexTwo += 1
+        window.blit(fighterTwo.stayOn[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
 
     def drawWindow():
         global animIndexOne
@@ -88,7 +94,7 @@ if __name__ == '__main__':
             window.blit(fighterTwo.goRight[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
             animIndexTwo += 1
         else:
-            window.blit(fighterTwo.stayOn[animIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
+            window.blit(fighterTwo.stayOn[stayIndexTwo // 8], (fighterTwo.x, fighterTwo.y))
 
         pygame.display.update()
 

@@ -1,4 +1,6 @@
 # This file contains code of game menu
+
+
 import pygame
 from subprocess import call
 from image_functions import load_image, text_to_surface

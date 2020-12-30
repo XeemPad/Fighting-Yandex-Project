@@ -1,6 +1,7 @@
 import pygame
 from object_classes import Fighter
 from pygame.mixer import music
+from object_classes import IMAGE_SCALE_VALUE
 
 from main import terminate, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, WINDOW_HEIGHT, \
     CONFIGURATION_FILE_DIRECTORY
@@ -17,6 +18,10 @@ CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.
             HIT: pygame.K_g, KICK: pygame.K_h, BLOCK: pygame.K_j},  # Управление первого игрока
            {LEFT: pygame.K_LEFT, RIGHT: pygame.K_RIGHT, DUCK: pygame.K_DOWN, JUMP: pygame.K_UP,
             HIT: pygame.K_1, KICK: pygame.K_2, BLOCK: pygame.K_3}]  # Управление второго игрока
+
+fighter_width = 63 * IMAGE_SCALE_VALUE
+FIGHTERS_X = [WINDOW_WIDTH // 10, WINDOW_WIDTH // 10 * 9 - fighter_width]
+FIGHTERS_Y = WINDOW_HEIGHT // 7 * 3
 
 music_volume = 0.05
 
@@ -48,7 +53,10 @@ all_sprites = pygame.sprite.Group()
 
 
 # Создание персонажей:
-fighters = [Fighter(all_sprites, fighter1), Fighter(all_sprites, fighter2)]
+fighters = [Fighter(all_sprites, fighter1, (FIGHTERS_X[0], FIGHTERS_Y)),
+            Fighter(all_sprites, fighter2, (FIGHTERS_X[1], FIGHTERS_Y))]
+
+fighters[1].revert()  # Поворачиваем второго игрока к центру
 
 
 running = True

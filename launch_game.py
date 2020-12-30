@@ -12,6 +12,12 @@ FPS = 40
 BACKGROUND_DIRECTORIES = {'background1': 'background1.jpg'}
 MUSIC_DIRECTORIES = ['data/sounds/bg_music/music_one.mp3', 'data/sounds/bg_music/music_two.mp3']
 
+LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
+CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.K_w,
+            HIT: pygame.K_g, KICK: pygame.K_h, BLOCK: pygame.K_j},  # Управление первого игрока
+           {LEFT: pygame.K_LEFT, RIGHT: pygame.K_RIGHT, DUCK: pygame.K_DOWN, JUMP: pygame.K_UP,
+            HIT: pygame.K_1, KICK: pygame.K_2, BLOCK: pygame.K_3}]  # Управление второго игрока
+
 music_volume = 0.4
 
 
@@ -41,6 +47,9 @@ music.play(-1)
 
 running = True
 while running:
-    pass
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            terminate()
+        pygame.MOUSEMOTION
 
 terminate()

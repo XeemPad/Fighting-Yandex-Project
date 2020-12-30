@@ -84,4 +84,31 @@ class Button:
 
 
 class Fighter:
-    pass
+    def __init__(self, character):
+        self.speed = 7
+        self.character = character
+        self.health = 100
+
+        self.walk = [pygame.image.load(f'data/sprites/{self.character}/walk1.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk2.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk3.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk4.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk5.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk6.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk7.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk8.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/walk9.png')]
+
+        self.idle = [pygame.image.load(f'data/sprites/{self.character}/idle1.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/idle2.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/idle3.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/idle4.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/idle5.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/idle6.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/idle7.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/idle8.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/idle9.png')]
+
+        self.duck = [pygame.image.load(f'data/sprites/{self.character}/duck1.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/duck2.png'),
+                     pygame.image.load(f'data/sprites/{self.character}/duck3.png')]

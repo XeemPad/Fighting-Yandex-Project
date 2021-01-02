@@ -26,6 +26,16 @@ FIGHTERS_Y = WINDOW_HEIGHT // 7 * 3
 music_volume = 0.05
 
 
+def triggered_keys_processing(event):
+    for fighter_num, fighter_dict in enumerate(CONTROL):
+        for key in fighter_dict:
+            if event.key == fighter_dict[key]:
+                if event.type == pygame.KEYDOWN:
+                    fighters[fighter_num].new_action(key)
+                elif event.type == pygame.KEYUP:
+                    fighters[fighter_num].stop_action(key)
+
+
 # Считываем информацию из конфига:
 with open(CONFIGURATION_FILE_DIRECTORY) as cfg:
     fighter1, fighter2, bg = (line for line in cfg.read().split('\n') if line.strip())
@@ -65,8 +75,11 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
-
+        elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+            triggered_keys_processing(event)
+    # Перерисовка спрайтов:
     all_sprites.update()
     all_sprites.draw(window)
+
     pygame.display.flip()
     clock.tick(FPS)

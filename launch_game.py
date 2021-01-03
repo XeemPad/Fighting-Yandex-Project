@@ -8,7 +8,7 @@ from main import terminate, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, WINDOW
 
 
 # Константы:
-FPS = 40
+FPS = 60
 
 BACKGROUND_DIRECTORIES = {'background1': 'data/backgrounds/background1.jpg'}
 MUSIC_DIRECTORIES = ['data/sounds/bg_music/music_one.mp3', 'data/sounds/bg_music/music_two.mp3']
@@ -26,14 +26,18 @@ FIGHTERS_Y = WINDOW_HEIGHT // 7 * 3
 music_volume = 0.05
 
 
-def triggered_keys_processing(event):
+def triggered_keys_processing(event=None, keys_status=None):
     for fighter_num, fighter_dict in enumerate(CONTROL):
-        for key in fighter_dict:
-            if event.key == fighter_dict[key]:
-                if event.type == pygame.KEYDOWN:
-                    fighters[fighter_num].new_action(key)
-                elif event.type == pygame.KEYUP:
-                    fighters[fighter_num].stop_action(key)
+        for action in fighter_dict:
+            if event:
+                if event.key == fighter_dict[action]:
+                    if event.type == pygame.KEYDOWN:
+                        fighters[fighter_num].new_action(action)
+                    elif event.type == pygame.KEYUP:
+                        fighters[fighter_num].stop_action(action)
+            elif keys_status:
+                if keys_status[fighter_dict[action]]:
+                    fighters[fighter_num].new_action(action)
 
 
 # Считываем информацию из конфига:
@@ -68,6 +72,8 @@ fighters = [Fighter(all_sprites, fighter1, (FIGHTERS_X[0], FIGHTERS_Y)),
 
 fighters[1].revert()  # Поворачиваем второго игрока к центру
 
+buttons_queue = set()
+
 
 running = True
 while running:
@@ -76,7 +82,10 @@ while running:
         if event.type == pygame.QUIT:
             terminate()
         elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-            triggered_keys_processing(event)
+            triggered_keys_processing(event=event)
+    keys_status = pygame.key.get_pressed()
+    if 1 in keys_status:
+        triggered_keys_processing(keys_status=keys_status)
     # Перерисовка спрайтов:
     all_sprites.update()
     all_sprites.draw(window)

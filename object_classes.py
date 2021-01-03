@@ -1,6 +1,7 @@
 import pygame
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
+NON_SKIPPABLE_ACTION = 'non-skip'
 
 WINDOW_WIDTH = 1024
 STANDARD_BUTTON_COLOR = (242, 72, 34)
@@ -105,11 +106,6 @@ class Fighter(pygame.sprite.Sprite):
         self.animation_delay = 7  # Задержка перед следующей картинкой анимации
         self.frames_count = 0
 
-        self.is_jump = False
-        self.is_duck = False
-        self.is_block = False
-        self.is_beat = False
-
         idle_images = [pygame.image.load(f'data/sprites/{self.character}/idle1.png'),
                        pygame.image.load(f'data/sprites/{self.character}/idle2.png'),
                        pygame.image.load(f'data/sprites/{self.character}/idle3.png'),
@@ -143,57 +139,43 @@ class Fighter(pygame.sprite.Sprite):
         self.jump = self.scaled_animation(jump_images)
 
         block_images = [pygame.image.load(f'data/sprites/{self.character}/block1.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/block2.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/block3.png')]
+                        pygame.image.load(f'data/sprites/{self.character}/block2.png'),
+                        pygame.image.load(f'data/sprites/{self.character}/block3.png')]
         self.block = self.scaled_animation(block_images)
 
         duckblock_images = [pygame.image.load(f'data/sprites/{self.character}/duckblock1.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/duckblock2.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/duckblock3.png')]
+                            pygame.image.load(f'data/sprites/{self.character}/duckblock2.png'),
+                            pygame.image.load(f'data/sprites/{self.character}/duckblock3.png')]
         self.duckblock = self.scaled_animation(duckblock_images)
 
         punch_images = [pygame.image.load(f'data/sprites/{self.character}/punch1.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/punch2.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/punch3.png')]
+                        pygame.image.load(f'data/sprites/{self.character}/punch2.png'),
+                        pygame.image.load(f'data/sprites/{self.character}/punch3.png')]
         self.punch = self.scaled_animation(punch_images)
 
-        self.image = self.idle[0]
-        self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
+        self.position = position
+        self.update_image(self.idle[0])
+        self.rect.topleft = self.position
 
-        self.rect.topleft = position
+        self.floor_y = self.rect.bottom
 
         # Текущая анимация:
         self.current_animation = self.idle
         self.animation_index = 0  # Текущий индекс элемента списка картинок анимации
         self.animation_is_cycled = True
 
+        self.current_actions = set()
+
     def new_action(self, action_name):
-        if not self.is_duck and self.animation_is_cycled:
-            if action_name == LEFT:
-                if self.image_is_reverted:
-                    self.current_animation = self.walk
-                else:
-                    # Персонаж идёт задом:
-                    self.current_animation = self.walk[::-1]
-                self.animation_is_cycled = True
-                self.animation_index = 0
-                self.current_x_speed = -self.x_speed
-            elif action_name == RIGHT:
-                if self.image_is_reverted:
-                    # Персонаж идёт задом:
-                    self.current_animation = self.walk[::-1]
-                else:
-                    self.current_animation = self.walk
-                self.animation_is_cycled = True
-                self.animation_index = 0
-                self.current_x_speed = self.x_speed
+        # Метод возвращает, выполнено ли запрашиваемое действие
+        if self.current_animation == self.idle:
+            if action_name == LEFT or action_name == RIGHT:
+                self.set_walk(action_name)
+                return True
             elif action_name == DUCK:
-                self.current_animation = self.duck
-                self.animation_is_cycled = False
-                self.animation_index = 0
-                self.is_duck = True
-                self.current_y_speed = self.y_speed
+                self.set_duck()
+                return True
+            return False
         else:
             if action_name in [LEFT, RIGHT, JUMP, DUCK, KICK]:
                 # Когда персонаж сидит нельзя выполнять эти действия
@@ -201,18 +183,22 @@ class Fighter(pygame.sprite.Sprite):
             else:
                 # Позже сидя можно будет биться и ставить блок
                 pass
+            return False
 
     def stop_action(self, key):
-        if self.current_animation in [self.walk, self.walk[::-1]]:
+        if self.current_animation in [self.walk, self.walk[::-1]] and key in [RIGHT, LEFT]:
             self.set_idle()
         elif (self.current_animation in [self.duck, self.block, self.duckblock] and
               key in [DUCK, BLOCK]):  # Список неполный
-            if key == DUCK:
-                self.is_duck = False
-                self.current_y_speed = -self.y_speed
-            elif key == self.block:
-                self.is_block = False
-            self.current_animation = self.current_animation[self.animation_index::-1]
+            if key == DUCK and self.current_animation == self.duck:
+                self.current_actions.add(NON_SKIPPABLE_ACTION)
+            elif key == self.block and self.current_animation in [self.block, self.duckblock]:
+                self.current_actions.add(NON_SKIPPABLE_ACTION)
+            if self.animation_index > 0:
+                self.current_animation = (self.current_animation[self.animation_index - 1::-1]
+                                          + [self.idle[0]])
+            else:
+                self.current_animation = [self.idle[0]]
             self.animation_index = 0
 
     @staticmethod
@@ -223,34 +209,35 @@ class Fighter(pygame.sprite.Sprite):
                                                 round(img.get_height() * IMAGE_SCALE_VALUE))),
                         img_list))
 
-    def update_mask(self):
-        self.rect = self.image.get_rect()
-        # вычисляем маску:
-        self.mask = pygame.mask.from_surface(self.image)
-
     def update(self):
         self.frames_count += 1
         if self.frames_count % self.animation_delay == 0:
             new_image = self.current_animation[self.animation_index]
             if (self.animation_index == len(self.current_animation) - 1) \
                     and not self.animation_is_cycled:
-                if not (self.is_duck or self.is_block):
-                    self.rect.y += self.current_y_speed
+                if NON_SKIPPABLE_ACTION in self.current_actions:
                     self.set_idle()
-                else:
-                    self.rect.y += self.current_y_speed
-                    self.current_y_speed = 0
             else:
                 self.animation_index = (self.animation_index + 1) % len(self.current_animation)
             # Разворачиваем картинку, если персонаж должен быть повёрнут:
             if self.image_is_reverted:
                 new_image = pygame.transform.flip(new_image, True, False)
-            self.image = new_image
-            self.rect.y += self.current_y_speed
+            self.update_image(new_image)  # Установка новой картинки
+
+            if JUMP not in self.current_actions:
+                self.rect.bottom = self.floor_y
         if self.current_x_speed:
             if ((0 < (self.rect.x + round(self.current_x_speed / self.animation_delay))
                  < WINDOW_WIDTH - fighter_width)):
                 self.rect.x += round(self.current_x_speed / self.animation_delay)
+
+            self.position = self.rect.topleft
+
+    def update_image(self, new_image):
+        self.image = new_image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = self.position
+        self.mask = pygame.mask.from_surface(self.image)
 
     def revert(self):
         if self.image_is_reverted:
@@ -264,3 +251,35 @@ class Fighter(pygame.sprite.Sprite):
         self.animation_index = 0
         self.current_x_speed = 0
         self.current_y_speed = 0
+
+        self.current_actions = set()
+
+    def set_walk(self, direction):
+        if direction == RIGHT:
+            if self.image_is_reverted:
+                # Персонаж идёт задом:
+                self.current_animation = self.walk[::-1]
+            else:
+                self.current_animation = self.walk
+            self.current_x_speed = self.x_speed
+        else:
+            if self.image_is_reverted:
+                # Персонаж идёт задом:
+                self.current_animation = self.walk
+            else:
+                self.current_animation = self.walk[::-1]
+            self.current_x_speed = -self.x_speed
+        self.animation_is_cycled = True
+        self.animation_index = 0
+
+        self.current_actions.add(direction)
+
+    def set_duck(self):
+        self.current_animation = self.duck
+        self.animation_is_cycled = False
+        self.animation_index = 0
+
+        self.current_actions.add(DUCK)
+
+    def set_block(self):
+        pass

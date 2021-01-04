@@ -27,9 +27,8 @@ fighter_width = 63 * IMAGE_SCALE_VALUE
 FIGHTERS_X = [WINDOW_WIDTH // 10, WINDOW_WIDTH // 10 * 9 - fighter_width]
 FIGHTERS_Y = WINDOW_HEIGHT // 7 * 3
 
-FIGHT_INFO_TEXT_SIZE = 80  # Размер текста надписей "Fight!", "Player N win!"
+FIGHT_INFO_TEXT_SIZE = 100  # Размер текста надписей "Fight!", "Player N win!"
 FIGHT_INFO_TEXT_COLOR = (255, 0, 51)
-FIGHT_INFO_TEXT_BORDER_COLOR = (255, 104, 0)
 
 music_volume = 0.05
 
@@ -87,18 +86,22 @@ fighters[1].revert()  # Поворачиваем второго игрока к 
 
 buttons_queue = set()
 
-# Предварительная прорисовка:
-window.blit(location, (0, 0))
-all_sprites.draw(window)
 
 # Надпись начала битвы:
 fight_info_text, text_width, text_height = text_to_surface('Fight!', FIGHT_INFO_TEXT_COLOR,
-                                                           FIGHT_INFO_TEXT_BORDER_COLOR,
                                                            font_size=FIGHT_INFO_TEXT_SIZE,
-                                                           font_directory=FONT_DIRECTORY)
+                                                           text_shadow=True, shadow_shift=4,
+                                                           font_directory=FONT_DIRECTORY,
+                                                           italic=True)
 title_x, title_y = (WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 5 * 2
-window.blit(fight_info_text, (title_x, title_y))  # Наложение текста на поверхность
 
+# Предварительная прорисовка:
+window.blit(location, (0, 0))
+all_sprites.update()
+all_sprites.draw(window)
+window.blit(fight_info_text, (title_x, title_y))  # Наложение текста на поверхность
+pygame.display.flip()
+clock.tick(1)  # Секунда перед началом битвы
 
 running = True
 while running:

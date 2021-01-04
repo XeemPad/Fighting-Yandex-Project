@@ -21,24 +21,19 @@ def load_image(directory_name, colorkey=None):
     return image
 
 
-def text_to_surface(text, text_color=(255, 255, 255), border_color=None, font_size=50, text_shadow=False,
-                    shadow_shift=SHADOW_SHIFT, border_width=1, font_directory=None):
+def text_to_surface(text, text_color=(255, 255, 255), font_size=50, text_shadow=False,
+                    shadow_shift=SHADOW_SHIFT,  font_directory=None, italic=False):
     font = pygame.font.Font(font_directory, font_size)
+    if italic:
+        font.set_italic(True)
     text_surface = font.render(text, True, text_color)
-    if border_color:
-        border_font = pygame.font.Font(font_directory, font_size + border_width)
-        border_text = border_font.render(text, True, border_color)
-    else:
-        border_width = 0
-    text_w = border_text.get_width() if border_width else text_surface.get_width() + border_width * 2
-    text_h = border_text.get_height() if border_width else text_surface.get_height() + border_width * 2
+    text_w = text_surface.get_width()
+    text_h = text_surface.get_height()
     if text_shadow:
         shadow_surface = font.render(text, True, SHADOW_COLOR)
         result_surface = pygame.Surface((text_w + shadow_shift, text_h + shadow_shift), pygame.SRCALPHA)
         result_surface.blit(shadow_surface, (shadow_shift, shadow_shift))
     else:
         result_surface = pygame.Surface((text_w, text_h), pygame.SRCALPHA)
-    if border_color:
-        result_surface.blit(border_text, (0, 0))
     result_surface.blit(text_surface, (0, 0))
     return result_surface, text_w, text_h

@@ -1,16 +1,12 @@
 # This file contains code of game menu
 
-
 import pygame
 from subprocess import call
-from image_functions import load_image, text_to_surface
-from object_classes import Button
-
 
 # Константы:
 GAME_NAME = 'Kind of Fighting'
 WINDOW_WIDTH, WINDOW_HEIGHT = 1024, 576
-FPS = 40
+FPS = 60
 
 ICON_FILE_DIRECTORY = 'data/icon.ico'
 MENU_BACKGROUND_DIRECTORY = 'data/menu_background.png'
@@ -33,6 +29,9 @@ def terminate():
 
 
 if __name__ == '__main__':
+    from image_functions import load_image, text_to_surface
+    from object_classes import Button
+
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))

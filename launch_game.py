@@ -1,4 +1,5 @@
 import pygame
+import os
 from object_classes import Fighter
 from pygame.mixer import music
 from object_classes import IMAGE_SCALE_VALUE
@@ -36,13 +37,18 @@ def triggered_keys_processing(event=None, keys_status=None):
                     elif event.type == pygame.KEYUP:
                         fighters[fighter_num].stop_action(action)
             elif keys_status:
-                if keys_status[fighter_dict[action]]:
+                if (keys_status[fighter_dict[action]] and
+                        action not in fighters[fighter_num].get_current_actions()):
                     fighters[fighter_num].new_action(action)
 
 
 # Считываем информацию из конфига:
 with open(CONFIGURATION_FILE_DIRECTORY) as cfg:
     fighter1, fighter2, bg = (line for line in cfg.read().split('\n') if line.strip())
+
+# Удаляем временный файл конфига(на время разработки отключены):
+# if os.path.isfile(CONFIGURATION_FILE_DIRECTORY):
+#     os.remove(CONFIGURATION_FILE_DIRECTORY)
 
 
 # Инициализация:
@@ -58,7 +64,7 @@ background = pygame.image.load(BACKGROUND_DIRECTORIES[bg])
 location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Музыка:
-music.load(MUSIC_DIRECTORIES[0])
+music.load(MUSIC_DIRECTORIES[1])
 music.set_volume(music_volume)
 music.play(-1)
 
@@ -69,7 +75,7 @@ all_sprites = pygame.sprite.Group()
 # Создание персонажей:
 fighters = [Fighter(all_sprites, fighter1, (FIGHTERS_X[0], FIGHTERS_Y)),
             Fighter(all_sprites, fighter2, (FIGHTERS_X[1], FIGHTERS_Y))]
-
+fighter_at_left = fighters[0]  # Персонаж, стоящий слева
 fighters[1].revert()  # Поворачиваем второго игрока к центру
 
 buttons_queue = set()
@@ -86,6 +92,23 @@ while running:
     keys_status = pygame.key.get_pressed()
     if 1 in keys_status:
         triggered_keys_processing(keys_status=keys_status)
+        # Если какая-то кнопка нажата, то, возможно, персонажи двигаются
+        # Тогда мы можем проверить, не поменялись ли они местами:
+        if fighters[0].get_center_x() <= fighters[1].get_center_x():
+            if fighter_at_left == fighters[0]:
+                pass  # Персонажи повёрнуты друг к другу
+            else:
+                fighters[0].revert()
+                fighters[1].revert()
+                fighter_at_left = fighters[0]
+        else:
+            if fighter_at_left == fighters[0]:
+                fighters[0].revert()
+                fighters[1].revert()
+                fighter_at_left = fighters[1]
+            else:
+                pass  # Персонажи повёрнуты друг к другу
+
     # Перерисовка спрайтов:
     all_sprites.update()
     all_sprites.draw(window)

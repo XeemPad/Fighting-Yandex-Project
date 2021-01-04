@@ -1,9 +1,9 @@
 import pygame
+from main import FPS, WINDOW_WIDTH
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 NON_SKIPPABLE_ACTION = 'non-skip'
 
-WINDOW_WIDTH = 1024
 STANDARD_BUTTON_COLOR = (242, 72, 34)
 STANDARD_SECONDARY_BUTTON_COLOR = (255, 204, 0)
 HORIZONTAL_INDENT, VERTICAL_INDENT = 12, 15
@@ -165,6 +165,12 @@ class Fighter(pygame.sprite.Sprite):
         self.animation_is_cycled = True
 
         self.current_actions = set()
+
+    def get_center_x(self):
+        return self.rect.centerx
+
+    def get_current_actions(self):
+        return self.current_actions
 
     def new_action(self, action_name):
         # Метод возвращает, выполнено ли запрашиваемое действие

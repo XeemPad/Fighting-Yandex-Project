@@ -166,6 +166,9 @@ class Fighter(pygame.sprite.Sprite):
 
         self.current_actions = set()
 
+    def get_hp(self):
+        return self.health
+
     def get_center_x(self):
         return self.rect.centerx
 

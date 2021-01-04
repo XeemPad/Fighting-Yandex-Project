@@ -6,7 +6,8 @@ from pygame.mixer import music
 from object_classes import IMAGE_SCALE_VALUE
 
 from main import terminate, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, WINDOW_HEIGHT, \
-    CONFIGURATION_FILE_DIRECTORY
+    CONFIGURATION_FILE_DIRECTORY, FONT_DIRECTORY
+from image_functions import text_to_surface
 
 
 # Константы:
@@ -25,6 +26,10 @@ CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.
 fighter_width = 63 * IMAGE_SCALE_VALUE
 FIGHTERS_X = [WINDOW_WIDTH // 10, WINDOW_WIDTH // 10 * 9 - fighter_width]
 FIGHTERS_Y = WINDOW_HEIGHT // 7 * 3
+
+FIGHT_INFO_TEXT_SIZE = 80  # Размер текста надписей "Fight!", "Player N win!"
+FIGHT_INFO_TEXT_COLOR = (255, 0, 51)
+FIGHT_INFO_TEXT_BORDER_COLOR = (255, 104, 0)
 
 music_volume = 0.05
 
@@ -63,7 +68,7 @@ clock = pygame.time.Clock()
 
 # Загрузка фона:
 background = pygame.image.load(BACKGROUND_DIRECTORIES[bg])
-location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))\
+location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Музыка:
 music.load(random.choice(MUSIC_DIRECTORIES))
@@ -81,6 +86,18 @@ fighter_at_left = fighters[0]  # Персонаж, стоящий слева
 fighters[1].revert()  # Поворачиваем второго игрока к центру
 
 buttons_queue = set()
+
+# Предварительная прорисовка:
+window.blit(location, (0, 0))
+all_sprites.draw(window)
+
+# Надпись начала битвы:
+fight_info_text, text_width, text_height = text_to_surface('Fight!', FIGHT_INFO_TEXT_COLOR,
+                                                           FIGHT_INFO_TEXT_BORDER_COLOR,
+                                                           font_size=FIGHT_INFO_TEXT_SIZE,
+                                                           font_directory=FONT_DIRECTORY)
+title_x, title_y = (WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 5 * 2
+window.blit(fight_info_text, (title_x, title_y))  # Наложение текста на поверхность
 
 
 running = True

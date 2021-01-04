@@ -11,7 +11,6 @@ HORIZONTAL_INDENT, VERTICAL_INDENT = 12, 15
 IMAGE_SCALE_VALUE = (WINDOW_WIDTH // 1024) * 2
 fighter_width = 63 * IMAGE_SCALE_VALUE
 
-
 pygame.init()
 
 
@@ -235,6 +234,10 @@ class Fighter(pygame.sprite.Sprite):
                                                (round(img.get_width() * IMAGE_SCALE_VALUE),
                                                 round(img.get_height() * IMAGE_SCALE_VALUE))),
                         img_list))
+
+    def get_damage(self):
+        self.health -= 7
+        print(self.health)
 
     def update(self):
         self.frames_count += 1

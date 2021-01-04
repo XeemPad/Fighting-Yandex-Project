@@ -44,7 +44,7 @@ if __name__ == '__main__':
         # Данные о поле боя:
         with open(CONFIGURATION_FILE_DIRECTORY, 'w', newline='') as cfg:
             first_fighter = 'scorpion'
-            second_fighter = 'scorpion'
+            second_fighter = 'liukang'
             background = 'background1'
             for line in [first_fighter, second_fighter, background]:
                 cfg.write(line + '\n')

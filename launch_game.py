@@ -18,7 +18,7 @@ LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hi
 CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.K_w,
             HIT: pygame.K_g, KICK: pygame.K_h, BLOCK: pygame.K_j},  # Управление первого игрока
            {LEFT: pygame.K_LEFT, RIGHT: pygame.K_RIGHT, DUCK: pygame.K_DOWN, JUMP: pygame.K_UP,
-            HIT: pygame.K_1, KICK: pygame.K_2, BLOCK: pygame.K_3}]  # Управление второго игрока
+            HIT: pygame.K_KP_1, KICK: pygame.K_KP_2, BLOCK: pygame.K_KP_3}]  # Управление 2го игрока
 
 fighter_width = 63 * IMAGE_SCALE_VALUE
 FIGHTERS_X = [WINDOW_WIDTH // 10, WINDOW_WIDTH // 10 * 9 - fighter_width]
@@ -61,7 +61,7 @@ clock = pygame.time.Clock()
 
 # Загрузка фона:
 background = pygame.image.load(BACKGROUND_DIRECTORIES[bg])
-location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
+location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))\
 
 # Музыка:
 music.load(MUSIC_DIRECTORIES[1])

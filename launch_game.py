@@ -1,4 +1,5 @@
 import pygame
+import random
 import os
 from object_classes import Fighter
 from pygame.mixer import music
@@ -12,7 +13,8 @@ from main import terminate, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, WINDOW
 FPS = 60
 
 BACKGROUND_DIRECTORIES = {'background1': 'data/backgrounds/background1.jpg'}
-MUSIC_DIRECTORIES = ['data/sounds/bg_music/music_one.mp3', 'data/sounds/bg_music/music_two.mp3']
+MUSIC_DIRECTORIES = ['data/sounds/bg_music/music_one.mp3', 'data/sounds/bg_music/music_two.mp3',
+                     'data/sounds/bg_music/music_three.mp3']
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.K_w,
@@ -64,7 +66,7 @@ background = pygame.image.load(BACKGROUND_DIRECTORIES[bg])
 location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))\
 
 # Музыка:
-music.load(MUSIC_DIRECTORIES[1])
+music.load(random.choice(MUSIC_DIRECTORIES))
 music.set_volume(music_volume)
 music.play(-1)
 

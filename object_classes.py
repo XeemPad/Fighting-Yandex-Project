@@ -216,10 +216,8 @@ class Fighter(pygame.sprite.Sprite):
                 if key == DUCK and BLOCK in self.current_actions:
                     self.current_animation = self.duck[::-1] + [self.idle[0]]
                     self.animation_index = 0
-                elif key == BLOCK:
-                    print('unblocked')
+                elif key == BLOCK and DUCK in self.current_actions:
                     self.set_duck(True)
-                    print(self.animation_index, len(self.current_animation))
                 else:
                     self.current_animation = [self.idle[0]]
                     self.animation_index = 0

@@ -9,13 +9,14 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 1024, 576
 FPS = 60
 
 ICON_FILE_DIRECTORY = 'data/icon.ico'
+FONT_DIRECTORY = 'data/font.otf'
 MENU_BACKGROUND_DIRECTORY = 'data/menu_background.png'
 MENU_MUSIC_DIRECTORY = 'data/sounds/menu_music.mp3'
 CONFIGURATION_FILE_DIRECTORY = 'info.txt'
 GAME_LAUNCH_DIRECTORY = 'launch_game.py'
 
 BUTTON_TEXT_COLOR = (51, 255, 51)
-BUTTON_TEXT_SIZE = 70
+BUTTON_TEXT_SIZE = 60
 BUTTONS_SIZE = (200, 80)
 TITLE_TEXT_COLOR = (255, 255, 0)
 
@@ -70,7 +71,8 @@ if __name__ == '__main__':
         # Установка названия игры в меню:
         font_size = 96
         title, title_width, title_height = text_to_surface(GAME_NAME, TITLE_TEXT_COLOR,
-                                                           font_size=font_size, text_shadow=True)
+                                                           font_size=font_size, text_shadow=True,
+                                                           font_directory=FONT_DIRECTORY)
         title_x, title_y = (WINDOW_WIDTH - title_width) // 2, (WINDOW_HEIGHT - title_height) // 10
         screen.blit(title, (title_x, title_y))  # А теперь и само название
 
@@ -80,14 +82,16 @@ if __name__ == '__main__':
         btn_w, btn_h = BUTTONS_SIZE
         buttons = []
         # Кнопка запуска игры:
-        play_text = text_to_surface('Играть', BUTTON_TEXT_COLOR, BUTTON_TEXT_SIZE,
-                                    text_shadow=True, shadow_shift=4)[0]
+        play_text = text_to_surface('Play', BUTTON_TEXT_COLOR, BUTTON_TEXT_SIZE,
+                                    text_shadow=True, shadow_shift=4,
+                                    font_directory=FONT_DIRECTORY)[0]
         play_btn = Button(play_text, width=btn_w, height=btn_h, function=start_game)
         play_btn.set_pos(((WINDOW_WIDTH - btn_w) // 2, buttons_y))
         buttons.append(play_btn)
         # Кнопка выхода:
-        exit_text = text_to_surface('Выйти', BUTTON_TEXT_COLOR, BUTTON_TEXT_SIZE,
-                                    text_shadow=True, shadow_shift=4)[0]
+        exit_text = text_to_surface('Quit', BUTTON_TEXT_COLOR, BUTTON_TEXT_SIZE,
+                                    text_shadow=True, shadow_shift=4,
+                                    font_directory=FONT_DIRECTORY)[0]
         exit_btn = Button(exit_text, width=btn_w, height=btn_h, function=terminate)
         exit_btn.set_pos(((WINDOW_WIDTH - btn_w) // 2, buttons_y + btn_h + buttons_distance))
         buttons.append(exit_btn)

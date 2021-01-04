@@ -22,8 +22,8 @@ def load_image(directory_name, colorkey=None):
 
 
 def text_to_surface(text, text_color=(255, 255, 255), font_size=50, text_shadow=False,
-                    shadow_shift=SHADOW_SHIFT):
-    font = pygame.font.Font(None, font_size)
+                    shadow_shift=SHADOW_SHIFT, font_directory=None):
+    font = pygame.font.Font(font_directory, font_size)
     text_surface = font.render(text, True, text_color)
     text_w = text_surface.get_width()
     text_h = text_surface.get_height()

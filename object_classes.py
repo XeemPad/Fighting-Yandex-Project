@@ -94,16 +94,16 @@ class Fighter(pygame.sprite.Sprite):
     def __init__(self, all_sprites, character, position):
         super().__init__(all_sprites)
 
-        self.x_speed = 18
-        self.y_speed = 36
-        self.gravity_acceleration = 4
+        self.x_speed = 18 * (WINDOW_WIDTH // 1024)
+        self.y_speed = 36 * (WINDOW_WIDTH // 1024)
+        self.gravity_acceleration = 4 * (WINDOW_WIDTH // 1024) ** 2
         self.current_x_speed = 0
         self.current_y_speed = 0  # Отрицательная скорость означает подъём вверх
         self.character = character
         self.health = 100
         self.image_is_reverted = False
 
-        self.animation_delay = 7  # Задержка перед следующей картинкой анимации
+        self.animation_delay = FPS / 60 * 10  # Задержка перед следующей картинкой анимации
         self.frames_count = 0
 
         idle_images = [pygame.image.load(f'data/sprites/{self.character}/idle1.png'),
@@ -184,31 +184,49 @@ class Fighter(pygame.sprite.Sprite):
             elif action_name == BLOCK:
                 self.set_block()
                 return True
-            return False
-        else:
-            if action_name in [LEFT, RIGHT, JUMP, DUCK, KICK]:
-                # Когда персонаж сидит нельзя выполнять эти действия
-                pass
+            elif action_name == HIT:
+                self.set_punch()
+                return True
+        elif self.current_actions < {LEFT, RIGHT, DUCK}:
+            if action_name == BLOCK:
+                if self.current_actions < {LEFT, RIGHT}:
+                    self.set_block()
+                    return True
+                elif self.current_actions == {DUCK}:
+                    if self.animation_index == len(self.current_animation) - 1:
+                        self.set_duckblock()
+                        return True
             else:
                 # Позже сидя можно будет биться и ставить блок
                 pass
-            return False
+        return False
 
     def stop_action(self, key):
         if self.current_animation in [self.walk, self.walk[::-1]] and key in [RIGHT, LEFT]:
             self.set_idle()
-        elif (self.current_animation in [self.duck, self.block, self.duckblock] and
-              key in [DUCK, BLOCK]):  # Список неполный
-            if key == DUCK and self.current_animation == self.duck:
+        elif (self.current_animation in [self.duck, self.block, self.duckblock, self.punch] and
+              key in [DUCK, BLOCK, HIT]):  # Список неполный
+            if key == DUCK and DUCK in self.current_actions:
                 self.current_actions.add(NON_SKIPPABLE_ACTION)
-            elif key == self.block and self.current_animation in [self.block, self.duckblock]:
+                self.current_actions.remove(DUCK)
+            elif key == BLOCK and BLOCK in self.current_actions:
+                self.current_actions.add(NON_SKIPPABLE_ACTION)
+            elif key == HIT and HIT in self.current_actions:
                 self.current_actions.add(NON_SKIPPABLE_ACTION)
             if self.animation_index > 0:
-                self.current_animation = (self.current_animation[self.animation_index - 1::-1]
-                                          + [self.idle[0]])
+                self.current_animation = self.current_animation[self.animation_index - 1::-1]
+                if key == DUCK and BLOCK in self.current_actions:
+                    self.current_animation.extend(self.duck[::-1] + [self.idle[0]])
+                self.animation_index = 0
             else:
-                self.current_animation = [self.idle[0]]
-            self.animation_index = 0
+                if key == DUCK and BLOCK in self.current_actions:
+                    self.current_animation = self.duck[::-1] + [self.idle[0]]
+                    self.animation_index = 0
+                elif key == BLOCK and DUCK in self.current_actions:
+                    self.set_duck(True)
+                else:
+                    self.current_animation = [self.idle[0]]
+                    self.animation_index = 0
 
     @staticmethod
     def scaled_animation(img_list):
@@ -225,7 +243,10 @@ class Fighter(pygame.sprite.Sprite):
             if (self.animation_index == len(self.current_animation) - 1) \
                     and not self.animation_is_cycled:
                 if NON_SKIPPABLE_ACTION in self.current_actions:
-                    self.set_idle()
+                    if DUCK in self.current_actions:
+                        self.set_duck(True)
+                    else:
+                        self.set_idle()
             else:
                 self.animation_index = (self.animation_index + 1) % len(self.current_animation)
             # Разворачиваем картинку, если персонаж должен быть повёрнут:
@@ -283,16 +304,29 @@ class Fighter(pygame.sprite.Sprite):
 
         self.current_actions.add(direction)
 
-    def set_duck(self):
+    def set_duck(self, last_anim=False):
         self.current_animation = self.duck
         self.animation_is_cycled = False
-        self.animation_index = 0
+        self.animation_index = len(self.duck) - 1 if last_anim else 0
 
-        self.current_actions.add(DUCK)
+        self.current_actions = {DUCK}
 
     def set_block(self):
+        self.set_idle()
         self.current_animation = self.block
         self.animation_is_cycled = False
+
+        self.current_actions.add(BLOCK)
+
+    def set_duckblock(self):
+        self.current_animation = self.duckblock
         self.animation_index = 0
 
         self.current_actions.add(BLOCK)
+
+    def set_punch(self):
+        self.current_animation = self.punch
+        self.animation_is_cycled = False
+        self.animation_index = 0
+
+        self.current_actions.add(HIT)

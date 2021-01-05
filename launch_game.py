@@ -80,8 +80,6 @@ fighters = [Fighter(all_sprites, fighter1, (FIGHTERS_X[0], FIGHTERS_Y)),
 fighter_at_left = fighters[0]  # Персонаж, стоящий слева
 fighters[1].revert()  # Поворачиваем второго игрока к центру
 
-buttons_queue = set()
-
 
 running = True
 while running:
@@ -113,12 +111,14 @@ while running:
 
 
     if pygame.sprite.collide_mask(fighters[0], fighters[1]):
-        if fighters[0].animation_index > fighters[1].animation_index:
+        if fighters[0].animation_index > fighters[1].animation_index and fighters[0].check_damage_ability() is True:
+            fighters[0].isDamaged = True
             fighters[1].get_damage()
-        elif fighters[0].animation_index < fighters[1].animation_index:
+        elif fighters[0].animation_index < fighters[1].animation_index and fighters[1].check_damage_ability() is True:
+            fighters[1].isDamaged = True
             fighters[0].get_damage()
         else:
-            fighters[0].get_damage()
+            pass
 
 
     # Перерисовка спрайтов:

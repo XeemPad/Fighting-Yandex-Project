@@ -105,6 +105,8 @@ class Fighter(pygame.sprite.Sprite):
         self.animation_delay = FPS / 60 * 10  # Задержка перед следующей картинкой анимации
         self.frames_count = 0
 
+        self.isDamaged = False
+
         idle_images = [pygame.image.load(f'data/sprites/{self.character}/idle1.png'),
                        pygame.image.load(f'data/sprites/{self.character}/idle2.png'),
                        pygame.image.load(f'data/sprites/{self.character}/idle3.png'),
@@ -248,6 +250,9 @@ class Fighter(pygame.sprite.Sprite):
                 if NON_SKIPPABLE_ACTION in self.current_actions:
                     if DUCK in self.current_actions:
                         self.set_duck(True)
+                    elif HIT in self.current_actions:
+                        self.set_punch()
+                        self.current_actions.remove(HIT)
                     else:
                         self.set_idle()
             else:
@@ -277,6 +282,12 @@ class Fighter(pygame.sprite.Sprite):
             self.image_is_reverted = False
         else:
             self.image_is_reverted = True
+
+    def check_damage_ability(self):
+        if self.isDamaged:
+            return False
+        elif not self.isDamaged and self.punch in self.current_animation:
+            return True
 
     def set_idle(self):
         self.current_animation = self.idle
@@ -331,5 +342,6 @@ class Fighter(pygame.sprite.Sprite):
         self.current_animation = self.punch
         self.animation_is_cycled = False
         self.animation_index = 0
-
+        self.isDamaged = False
         self.current_actions.add(HIT)
+        self.current_actions.add(NON_SKIPPABLE_ACTION)

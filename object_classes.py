@@ -1,5 +1,6 @@
 import pygame
 from main import FPS, WINDOW_WIDTH
+from image_functions import text_to_surface
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 NON_SKIPPABLE_ACTION = 'non-skip'
@@ -10,6 +11,11 @@ HORIZONTAL_INDENT, VERTICAL_INDENT = 12, 15
 
 IMAGE_SCALE_VALUE = (WINDOW_WIDTH // 1024) * 2
 fighter_width = 63 * IMAGE_SCALE_VALUE
+
+PLAYER_NAME_FONT_DIRECTORY = 'data/font2.ttf'
+PLAYER_NAME_FONT_SIZE = 28
+
+HEALTH_COLOR = (0, 255, 0)
 
 
 pygame.init()
@@ -88,6 +94,42 @@ class Button:
                              (0, 0, self.width, self.height), 1)
             self.surface.blit(self.text_surface, ((self.width - self.text_width) // 2,
                                                   (self.height - self.text_height) // 2))
+
+
+class HealthBar:
+    def __init__(self, player_name, align_is_left=True):
+        self.align_is_left = align_is_left
+        self.text = player_name
+        self.width, self.height = WINDOW_WIDTH // 5 * 2, 50
+        self.hp = 100
+
+        self.font = pygame.font.Font(PLAYER_NAME_FONT_DIRECTORY, PLAYER_NAME_FONT_SIZE)
+        self.render_health_bar()
+        self.render_text_on_bar()
+
+    def render_health_bar(self):
+        self.health_surface = pygame.Surface((self.width, self.height))
+        self.health_surface.fill((255, 0, 0))
+        pygame.draw.rect(self.health_surface, HEALTH_COLOR,
+                         (0, 0, self.width * (self.hp // 100), self.height))
+
+    def render_text_on_bar(self):
+        self.text_surface, self.text_w, self.text_h = text_to_surface(self.text, (0, 0, 0), PLAYER_NAME_FONT_SIZE,
+                                                                      font_directory=PLAYER_NAME_FONT_DIRECTORY)
+        self.text_x = 10 if self.align_is_left else self.width - 10 - self.text_w
+        self.text_y = (self.height - self.text_h) // 2 - 2
+        self.health_surface.blit(self.text_surface, (self.text_x, self.text_y))
+
+    def update(self, new_hp):
+        self.hp = new_hp
+        self.render_health_bar()
+        self.render_text_on_bar()
+
+    def get_surface(self):
+        return self.health_surface
+
+    def get_size(self):
+        return self.width, self.height
 
 
 class Fighter(pygame.sprite.Sprite):

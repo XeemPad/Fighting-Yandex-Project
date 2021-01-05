@@ -1,9 +1,8 @@
 import pygame
 import random
 import os
-from object_classes import Fighter
+from object_classes import Fighter, HealthBar, IMAGE_SCALE_VALUE
 from pygame.mixer import music
-from object_classes import IMAGE_SCALE_VALUE
 
 from main import terminate, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, WINDOW_HEIGHT, \
     CONFIGURATION_FILE_DIRECTORY, FONT_DIRECTORY
@@ -26,6 +25,8 @@ CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.
 fighter_width = 63 * IMAGE_SCALE_VALUE
 FIGHTERS_X = [WINDOW_WIDTH // 10, WINDOW_WIDTH // 10 * 9 - fighter_width]
 FIGHTERS_Y = WINDOW_HEIGHT // 7 * 3
+
+HEALTH_BAR_INDENT = (10, 10)
 
 FIGHT_INFO_TEXT_SIZE = 100  # Размер текста надписей "Fight!", "Player N win!"
 FIGHT_INFO_TEXT_COLOR = (255, 0, 51)
@@ -50,7 +51,7 @@ def triggered_keys_processing(event=None, keys_status=None):
 
 # Считываем информацию из конфига:
 with open(CONFIGURATION_FILE_DIRECTORY) as cfg:
-    fighter1, fighter2, bg = (line for line in cfg.read().split('\n') if line.strip())
+    fighter1_char, fighter2_char, bg = (line for line in cfg.read().split('\n') if line.strip())
 
 # Удаляем временный файл конфига(на время разработки отключены):
 # if os.path.isfile(CONFIGURATION_FILE_DIRECTORY):
@@ -79,13 +80,16 @@ all_sprites = pygame.sprite.Group()
 
 
 # Создание персонажей:
-fighters = [Fighter(all_sprites, fighter1, (FIGHTERS_X[0], FIGHTERS_Y)),
-            Fighter(all_sprites, fighter2, (FIGHTERS_X[1], FIGHTERS_Y))]
+fighters = [Fighter(all_sprites, fighter1_char, (FIGHTERS_X[0], FIGHTERS_Y)),
+            Fighter(all_sprites, fighter2_char, (FIGHTERS_X[1], FIGHTERS_Y))]
 fighter_at_left = fighters[0]  # Персонаж, стоящий слева
 fighters[1].revert()  # Поворачиваем второго игрока к центру
 
-buttons_queue = set()
-
+# Создание полосок здоровья персонажей(с координатами в данном окне):
+hp_bars = [HealthBar(f'Player 1 ({fighter1_char})', True),
+           HealthBar(f'Player 2 ({fighter2_char})', False)]
+bars_coords = (HEALTH_BAR_INDENT,
+               (WINDOW_WIDTH - hp_bars[1].get_size()[0] - HEALTH_BAR_INDENT[0], 10))
 
 # Надпись начала битвы:
 fight_info_text, text_width, text_height = text_to_surface('Fight!', FIGHT_INFO_TEXT_COLOR,
@@ -93,19 +97,27 @@ fight_info_text, text_width, text_height = text_to_surface('Fight!', FIGHT_INFO_
                                                            text_shadow=True, shadow_shift=4,
                                                            font_directory=FONT_DIRECTORY,
                                                            italic=True)
-title_x, title_y = (WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 5 * 2
+fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 5 * 2)
 
 # Предварительная прорисовка:
 window.blit(location, (0, 0))
 all_sprites.update()
 all_sprites.draw(window)
-window.blit(fight_info_text, (title_x, title_y))  # Наложение текста на поверхность
+for num, bar in enumerate(hp_bars):  # Отрисовка полосок со здоровьем
+    coords = bars_coords[num]
+    window.blit(bar.get_surface(), coords)
+window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
 pygame.display.flip()
 clock.tick(1)  # Секунда перед началом битвы
 
 running = True
 while running:
     window.blit(location, (0, 0))
+    # Отрисовка полосок со здоровьем и их обновление
+    for num, bar in enumerate(hp_bars):
+        coords = bars_coords[num]
+        bar.update(fighters[num].get_hp())
+        window.blit(bar.get_surface(), coords)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()

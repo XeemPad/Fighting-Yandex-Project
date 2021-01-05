@@ -1,5 +1,6 @@
 import pygame
 from main import FPS, WINDOW_WIDTH
+from image_functions import text_to_surface
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 NON_SKIPPABLE_ACTION = 'non-skip'
@@ -336,7 +337,7 @@ class Fighter(pygame.sprite.Sprite):
     def check_damage_ability(self):
         if self.isDamaged:
             return False
-        elif not self.isDamaged and self.punch in self.current_animation:
+        elif not self.isDamaged and HIT in self.current_actions:
             return True
 
     def set_idle(self):

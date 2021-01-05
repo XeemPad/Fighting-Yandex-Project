@@ -111,7 +111,7 @@ class HealthBar:
         self.health_surface = pygame.Surface((self.width, self.height))
         self.health_surface.fill((255, 0, 0))
         pygame.draw.rect(self.health_surface, HEALTH_COLOR,
-                         (0, 0, self.width * (self.hp // 100), self.height))
+                         (0, 0, round(self.width * (self.hp / 100)), self.height))
 
     def render_text_on_bar(self):
         self.text_surface, self.text_w, self.text_h = text_to_surface(self.text, (0, 0, 0), PLAYER_NAME_FONT_SIZE,

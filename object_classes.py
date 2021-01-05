@@ -268,6 +268,9 @@ class Fighter(pygame.sprite.Sprite):
                  < WINDOW_WIDTH - fighter_width)):
                 self.rect.x += round(self.current_x_speed / self.animation_delay)
 
+        if self.image_is_reverted:
+            self.position = self.rect.topright
+        else:
             self.position = self.rect.topleft
 
     def update_image(self, new_image):

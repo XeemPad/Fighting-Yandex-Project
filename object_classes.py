@@ -251,8 +251,7 @@ class Fighter(pygame.sprite.Sprite):
                     if DUCK in self.current_actions:
                         self.set_duck(True)
                     elif HIT in self.current_actions:
-                        self.set_punch()
-                        self.current_actions.remove(HIT)
+                        self.set_punch(True)
                     else:
                         self.set_idle()
             else:
@@ -274,7 +273,10 @@ class Fighter(pygame.sprite.Sprite):
     def update_image(self, new_image):
         self.image = new_image
         self.rect = self.image.get_rect()
-        self.rect.topleft = self.position
+        if self.image_is_reverted:
+            self.rect.topright = self.position
+        else:
+            self.rect.topleft = self.position
         self.mask = pygame.mask.from_surface(self.image)
 
     def revert(self):
@@ -338,10 +340,13 @@ class Fighter(pygame.sprite.Sprite):
 
         self.current_actions.add(BLOCK)
 
-    def set_punch(self):
+    def set_punch(self, reversed=False):
         self.current_animation = self.punch
         self.animation_is_cycled = False
         self.animation_index = 0
         self.isDamaged = False
         self.current_actions.add(HIT)
         self.current_actions.add(NON_SKIPPABLE_ACTION)
+        if reversed:
+            self.current_animation = self.punch[len(self.current_animation) - 1::-1]
+            self.current_actions.remove(HIT)

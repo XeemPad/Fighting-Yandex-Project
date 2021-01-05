@@ -109,7 +109,6 @@ while running:
             else:
                 pass  # Персонажи повёрнуты друг к другу
 
-
     if pygame.sprite.collide_mask(fighters[0], fighters[1]):
         if fighters[0].animation_index > fighters[1].animation_index and fighters[0].check_damage_ability() is True:
             fighters[0].isDamaged = True
@@ -119,7 +118,6 @@ while running:
             fighters[0].get_damage()
         else:
             pass
-
 
     # Перерисовка спрайтов:
     all_sprites.update()

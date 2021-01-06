@@ -36,6 +36,7 @@ class Button:
         self.button_color = button_color
         self.secondary_button_color = secondary_button_color
         self.function = function
+        self.mouse_is_on_btn = False
 
         self.text_width, self.text_height = (self.text_surface.get_rect().width,
                                              self.text_surface.get_rect().height)
@@ -47,12 +48,7 @@ class Button:
             raise SizeError('Введённый размер кнопки меньше размера текста')
         self.width, self.height = width, height
         self.surface = pygame.Surface((self.width, self.height))  # Поверхность кнопки
-        self.surface.fill(self.button_color)  # Основной цвет кнопки
-        pygame.draw.rect(self.surface, self.secondary_button_color,
-                         (0, 0, self.width, self.height), 1)  # Дополнительный цвет(обводка)
-        # Наложение текста на поверхность кнопки:
-        self.surface.blit(self.text_surface, ((self.width - self.text_width) // 2,
-                                              (self.height - self.text_height) // 2))
+        self.paint()  # Прорисовка элементов кнопки
 
     def get_pos(self):
         return self.position
@@ -79,21 +75,34 @@ class Button:
             return True
         return False
 
-    def set_under_mouse_effect(self, mouse_is_on_btn=True):  # Реакция кнопки на наведение мыши
-        if mouse_is_on_btn:
-            # Перерисовка кнопки с обратными цветами:
-            self.surface.fill(self.secondary_button_color)
-            pygame.draw.rect(self.surface, self.button_color, (0, 0, self.width, self.height), 1)
-            self.surface.blit(self.text_surface, ((self.width - self.text_width) // 2,
-                                                  (self.height - self.text_height) // 2))
+    def paint(self):
+        if self.mouse_is_on_btn:  # Меняем цвета местами, если на кнопку наведена мышь
+            button_color = self.secondary_button_color
+            secondary_button_color = self.button_color
         else:
-            # Отрисовка кнопки со стандартными цветами
-            self.surface = pygame.Surface((self.width, self.height))
-            self.surface.fill(self.button_color)
-            pygame.draw.rect(self.surface, self.secondary_button_color,
-                             (0, 0, self.width, self.height), 1)
-            self.surface.blit(self.text_surface, ((self.width - self.text_width) // 2,
-                                                  (self.height - self.text_height) // 2))
+            button_color = self.button_color
+            secondary_button_color = self.secondary_button_color
+        self.surface.fill(button_color)  # Основной цвет кнопки
+        pygame.draw.rect(self.surface, secondary_button_color,
+                         (0, 0, self.width, self.height), 1)  # Дополнительный цвет(обводка)
+        # Наложение текста на поверхность кнопки:
+        self.surface.blit(self.text_surface, ((self.width - self.text_width) // 2,
+                                              (self.height - self.text_height) // 2))
+
+    def set_under_mouse_effect(self, mouse_is_on_btn=True):  # Реакция кнопки на наведение мыши
+        self.mouse_is_on_btn = mouse_is_on_btn
+        self.paint()
+
+    def set_text(self, new_text_surface):
+        text_width, text_height = (new_text_surface.get_rect().width,
+                                   new_text_surface.get_rect().height)
+        if text_width > self.width or text_height > self.height:
+            raise SizeError('Размер нового текста превышает размер кнопки')
+        self.text_surface = new_text_surface
+        self.text_width, self.text_height = text_width, text_height
+
+        # Перерисовка кнопки:
+        self.paint()
 
 
 class HealthBar:

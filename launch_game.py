@@ -65,8 +65,12 @@ def pause_or_unpause():
     global is_paused
     if is_paused:
         is_paused = False
+        pause_btn.set_text(text_to_surface('Pause', PAUSE_BTN_TEXT_COLOR, PAUSE_BTN_TEXT_SIZE,
+                                           font_directory=FONT_DIRECTORY)[0])
     else:
         is_paused = True
+        pause_btn.set_text(text_to_surface('Unpause', PAUSE_BTN_TEXT_COLOR, PAUSE_BTN_TEXT_SIZE,
+                                           font_directory=FONT_DIRECTORY)[0])
 
 
 # Считываем информацию из конфига:

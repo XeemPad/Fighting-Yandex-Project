@@ -1,6 +1,7 @@
 # This file contains code of game menu
 
 import pygame
+import random
 from subprocess import call
 
 # Константы:
@@ -14,6 +15,7 @@ MENU_BACKGROUND_DIRECTORY = 'data/menu_background.png'
 MENU_MUSIC_DIRECTORY = 'data/sounds/menu_music.mp3'
 CONFIGURATION_FILE_DIRECTORY = 'info.txt'
 GAME_LAUNCH_DIRECTORY = 'launch_game.py'
+GAME_BACKGROUNDS = ['background1', 'background2', 'background3', 'background4', 'background5']
 
 BUTTON_TEXT_COLOR = (51, 255, 51)
 BUTTON_TEXT_SIZE = 60
@@ -29,6 +31,20 @@ def terminate():
     exit()
 
 
+def start_game():
+    # Данные о поле боя:
+    with open(CONFIGURATION_FILE_DIRECTORY, 'w', newline='') as cfg:
+        first_fighter = 'scorpion'
+        second_fighter = 'scorpion'
+        background = random.choice(GAME_BACKGROUNDS)
+        for line in [first_fighter, second_fighter, background]:
+            cfg.write(line + '\n')
+    # Запуск скрипта с игровым процессом:
+    pygame.quit()
+    call('python launch_game.py')
+    terminate()
+
+
 if __name__ == '__main__':
     from image_functions import load_image, text_to_surface
     from object_classes import Button
@@ -38,20 +54,6 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption('Fighting')
     pygame.display.set_icon(pygame.image.load(ICON_FILE_DIRECTORY))
-
-
-    def start_game():
-        # Данные о поле боя:
-        with open(CONFIGURATION_FILE_DIRECTORY, 'w', newline='') as cfg:
-            first_fighter = 'scorpion'
-            second_fighter = 'scorpion'
-            background = 'background1'
-            for line in [first_fighter, second_fighter, background]:
-                cfg.write(line + '\n')
-        # Запуск скрипта с игровым процессом:
-        pygame.quit()
-        call('python launch_game.py')
-        terminate()
 
 
     def game_menu():

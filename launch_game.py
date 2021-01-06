@@ -1,11 +1,10 @@
 import pygame
 import random
-import os
 from object_classes import Fighter, HealthBar, Button, IMAGE_SCALE_VALUE
 from pygame.mixer import music
 
-from main import terminate, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, WINDOW_HEIGHT, \
-    CONFIGURATION_FILE_DIRECTORY, FONT_DIRECTORY
+from main import terminate, start_game, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, \
+    WINDOW_HEIGHT, CONFIGURATION_FILE_DIRECTORY, FONT_DIRECTORY
 from image_functions import text_to_surface
 
 
@@ -30,6 +29,8 @@ fighter_width = 63 * IMAGE_SCALE_VALUE
 FIGHTERS_X = [WINDOW_WIDTH // 10, WINDOW_WIDTH // 10 * 9 - fighter_width]
 FIGHTERS_Y = WINDOW_HEIGHT // 7 * 3
 
+PLAYERNAMES = ('Player 1', 'Player 2')
+
 HEALTH_BAR_INDENT = (10, 10)
 
 FIGHT_INFO_TEXT_SIZE = 100  # Размер текста надписей "Fight!", "Player N win!"
@@ -39,6 +40,11 @@ PAUSE_BTN_TEXT_COLOR = (63, 37, 18)
 PAUSE_BTN_TEXT_SIZE = round(36 * (WINDOW_WIDTH / 1024))
 PAUSE_BTN_COLOR = (255, 43, 43)
 PAUSE_BTN_SECONDARY_COLOR = (247, 148, 60)
+
+RESTART_BTN_TEXT_COLOR = (63, 37, 18)
+RESTART_BTN_TEXT_SIZE = round(36 * (WINDOW_WIDTH / 1024))
+RESTART_BTN_COLOR = (247, 148, 60)
+RESTART_BTN_SECONDARY_COLOR = (255, 43, 43)
 
 buttons = []
 music_volume = 0.05
@@ -60,26 +66,50 @@ def triggered_keys_processing(event=None, keys_status=None):
                     fighters[fighter_num].new_action(action)
 
 
-def pause_or_unpause():
-    # Простейший код данной функции
+def pause_or_unpause(paused_by_button=True):  # Функция для установки или сброса паузы
     global is_paused
     if is_paused:
         is_paused = False
-        pause_btn.set_text(text_to_surface('Pause', PAUSE_BTN_TEXT_COLOR, PAUSE_BTN_TEXT_SIZE,
-                                           font_directory=FONT_DIRECTORY)[0])
+        if paused_by_button:  # Если пауза была вызвана кнопкой
+            pause_btn.set_text(text_to_surface('Pause', PAUSE_BTN_TEXT_COLOR, PAUSE_BTN_TEXT_SIZE,
+                                               font_directory=FONT_DIRECTORY)[0])
     else:
         is_paused = True
-        pause_btn.set_text(text_to_surface('Unpause', PAUSE_BTN_TEXT_COLOR, PAUSE_BTN_TEXT_SIZE,
-                                           font_directory=FONT_DIRECTORY)[0])
+        if paused_by_button:  # Если пауза была вызвана кнопкой
+            pause_btn.set_text(text_to_surface('Unpause', PAUSE_BTN_TEXT_COLOR, PAUSE_BTN_TEXT_SIZE,
+                                               font_directory=FONT_DIRECTORY)[0])
+
+
+def game_over(winner=None):
+    pause_or_unpause(False)
+    if not winner:  # Ничья
+        result_text = 'Draw'
+    else:
+        result_text = PLAYERNAMES[fighters.index(winner)] + '  ' + 'wins!'
+    # Надпись результатов:
+    fight_info_text, text_width, text_height = text_to_surface(result_text, FIGHT_INFO_TEXT_COLOR,
+                                                               font_size=FIGHT_INFO_TEXT_SIZE,
+                                                               text_shadow=True, shadow_shift=4,
+                                                               font_directory=FONT_DIRECTORY,
+                                                               italic=True)
+    fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 7 * 2)
+
+    window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
+
+    # Создание кнопки перезапуска игры:
+    restart_btn_text = text_to_surface('Play again', RESTART_BTN_TEXT_COLOR, RESTART_BTN_TEXT_SIZE,
+                                       font_directory=FONT_DIRECTORY)[0]
+    restart_btn = Button(restart_btn_text, RESTART_BTN_COLOR, RESTART_BTN_SECONDARY_COLOR,
+                         WINDOW_WIDTH // 4, WINDOW_HEIGHT // 10, function=start_game)
+    restart_btn_coords = ((WINDOW_WIDTH - restart_btn.get_size()[0]) // 2,
+                          fight_info_coords[1] + text_height + 30)
+    restart_btn.set_pos(restart_btn_coords)
+    buttons.append(restart_btn)
 
 
 # Считываем информацию из конфига:
 with open(CONFIGURATION_FILE_DIRECTORY) as cfg:
     fighter1_char, fighter2_char, bg = (line for line in cfg.read().split('\n') if line.strip())
-
-# Удаляем временный файл конфига(на время разработки отключены):
-# if os.path.isfile(CONFIGURATION_FILE_DIRECTORY):
-#     os.remove(CONFIGURATION_FILE_DIRECTORY)
 
 
 # Инициализация:
@@ -110,8 +140,8 @@ fighter_at_left = fighters[0]  # Персонаж, стоящий слева
 fighters[1].revert()  # Поворачиваем второго игрока к центру
 
 # Создание полосок здоровья персонажей(с координатами в данном окне):
-hp_bars = [HealthBar(f'Player 1 ({fighter1_char})', True),
-           HealthBar(f'Player 2 ({fighter2_char})', False)]
+hp_bars = [HealthBar(f'{PLAYERNAMES[0]} ({fighter1_char})', True),
+           HealthBar(f'{PLAYERNAMES[1]} ({fighter2_char})', False)]
 bars_coords = (HEALTH_BAR_INDENT,
                (WINDOW_WIDTH - hp_bars[1].get_size()[0] - HEALTH_BAR_INDENT[0], 10))
 
@@ -130,7 +160,7 @@ fight_info_text, text_width, text_height = text_to_surface('Fight!', FIGHT_INFO_
                                                            text_shadow=True, shadow_shift=4,
                                                            font_directory=FONT_DIRECTORY,
                                                            italic=True)
-fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 5 * 2)
+fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 7 * 2)
 
 # Предварительная прорисовка:
 window.blit(location, (0, 0))
@@ -142,11 +172,14 @@ for num, bar in enumerate(hp_bars):  # Отрисовка полосок со з
 window.blit(pause_btn.get_surface(), pause_btn_coords)  # Отрисовка кнопки паузы
 window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
 pygame.display.flip()
-clock.tick(1)  # Секунда перед началом битвы
+pause_or_unpause(False)  # Ставим игру на паузу
+frames_on_pause_count = 0
 
 running = True
 while running:
     while is_paused:  # Во время паузы ставим изменённый цикл
+        if frames_on_pause_count == FPS:  # Если с момента паузы прошла 1 секунда
+            pause_or_unpause(False)  # Снимаем с паузы игру
         # Обработка событий:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -160,17 +193,15 @@ while running:
                     # Проверка нажатия на кнопку:
                     if btn.check_mouse_position(event.pos):
                         btn.trigger()
-        window.blit(pause_btn.get_surface(), pause_btn_coords)  # Отрисовка кнопки паузы
+
+        # Отрисовка кнопок:
+        for btn in buttons:
+            window.blit(btn.get_surface(), btn.get_pos())
 
         pygame.display.flip()
         clock.tick(FPS)
+        frames_on_pause_count += 1
     window.blit(location, (0, 0))
-    # Отрисовка полосок со здоровьем и их обновление
-    for num, bar in enumerate(hp_bars):
-        coords = bars_coords[num]
-        bar.update(fighters[num].get_hp())
-        window.blit(bar.get_surface(), coords)
-    window.blit(pause_btn.get_surface(), pause_btn_coords)  # Отрисовка кнопки паузы
 
     # Обработка событий:
     for event in pygame.event.get():
@@ -211,6 +242,26 @@ while running:
     # Перерисовка спрайтов:
     all_sprites.update()
     all_sprites.draw(window)
+
+    # Отрисовка полосок со здоровьем и их обновление
+    for num, bar in enumerate(hp_bars):
+        coords = bars_coords[num]
+        bar.update(fighters[num].get_hp())
+        window.blit(bar.get_surface(), coords)
+    # Отрисовка кнопок:
+    for btn in buttons:
+        window.blit(btn.get_surface(), pause_btn_coords)
+
+    # Проверка здоровья персонажей и объявление результатов при необходимости:
+    if not fighters[0].get_hp() > 0 < fighters[1].get_hp():
+        if fighters[0].get_hp() <= 0:
+            if fighters[1].get_hp() <= 0:
+                game_over()
+            else:
+                game_over(winner=fighters[1])
+        else:
+            if fighters[1].get_hp() <= 0:
+                game_over(winner=fighters[0])
 
     pygame.display.flip()
     clock.tick(FPS)

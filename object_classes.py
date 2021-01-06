@@ -104,6 +104,21 @@ class Button:
         # Перерисовка кнопки:
         self.paint()
 
+    def set_under_mouse_effect(self, mouse_is_on_btn=True):  # Реакция кнопки на наведение мыши
+        self.mouse_is_on_btn = mouse_is_on_btn
+        self.paint()
+
+    def set_text(self, new_text_surface):
+        text_width, text_height = (new_text_surface.get_rect().width,
+                                   new_text_surface.get_rect().height)
+        if text_width > self.width or text_height > self.height:
+            raise SizeError('Размер нового текста превышает размер кнопки')
+        self.text_surface = new_text_surface
+        self.text_width, self.text_height = text_width, text_height
+
+        # Перерисовка кнопки:
+        self.paint()
+
 
 class HealthBar:
     def __init__(self, player_name, align_is_left=True):
@@ -237,6 +252,9 @@ class Fighter(pygame.sprite.Sprite):
                 return True
             elif action_name == BLOCK:
                 self.set_block()
+            elif action_name == HIT:
+                self.set_punch()
+                return True
         elif self.current_actions < {LEFT, RIGHT, DUCK}:
             if action_name == BLOCK:
                 if self.current_actions < {LEFT, RIGHT}:
@@ -260,6 +278,8 @@ class Fighter(pygame.sprite.Sprite):
                 self.current_actions.add(NON_SKIPPABLE_ACTION)
                 self.current_actions.remove(DUCK)
             elif key == BLOCK and BLOCK in self.current_actions:
+                self.current_actions.add(NON_SKIPPABLE_ACTION)
+            elif key == HIT and HIT in self.current_actions:
                 self.current_actions.add(NON_SKIPPABLE_ACTION)
             if self.animation_index > 0:
                 self.current_animation = self.current_animation[self.animation_index - 1::-1]
@@ -293,6 +313,9 @@ class Fighter(pygame.sprite.Sprite):
                 if NON_SKIPPABLE_ACTION in self.current_actions:
                     if DUCK in self.current_actions:
                         self.set_duck(True)
+                    elif HIT in self.current_actions:
+                        self.set_punch()
+                        self.current_actions.remove(HIT)
                     else:
                         self.set_idle()
             else:
@@ -314,7 +337,10 @@ class Fighter(pygame.sprite.Sprite):
     def update_image(self, new_image):
         self.image = new_image
         self.rect = self.image.get_rect()
-        self.rect.topleft = self.position
+        if self.image_is_reverted:
+            self.rect.topright = self.position
+        else:
+            self.rect.topleft = self.position
         self.mask = pygame.mask.from_surface(self.image)
 
     def revert(self):
@@ -322,6 +348,12 @@ class Fighter(pygame.sprite.Sprite):
             self.image_is_reverted = False
         else:
             self.image_is_reverted = True
+
+    def check_damage_ability(self):
+        if self.isDamaged:
+            return False
+        elif not self.isDamaged and self.punch in self.current_animation:
+            return True
 
     def set_idle(self):
         self.current_animation = self.idle
@@ -371,3 +403,14 @@ class Fighter(pygame.sprite.Sprite):
         self.animation_index = 0
 
         self.current_actions.add(BLOCK)
+
+    def set_punch(self, reversed=False):
+        self.current_animation = self.punch
+        self.animation_is_cycled = False
+        self.animation_index = 0
+        self.isDamaged = False
+        self.current_actions.add(HIT)
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
+        if reversed:
+            self.current_animation = self.punch[len(self.current_animation) - 1::-1]
+            self.current_actions.remove(HIT)

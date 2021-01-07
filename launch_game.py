@@ -214,25 +214,20 @@ while running:
                 if fighters[0].animation_index > fighters[1].animation_index:
                     fighters[0].isDamaged = True
                     fighters[1].get_damage()
-                    print('1 damaged')
                 elif fighters[0].animation_index < fighters[1].animation_index:
                     fighters[1].isDamaged = True
                     fighters[0].get_damage()
-                    print('0 damaged')
                 else:
                     fighters[0].isDamaged = True
                     fighters[1].get_damage()
                     fighters[1].isDamaged = True
                     fighters[0].get_damage()
-                    print('0 and 1 damaged')
             else:
                 fighters[0].isDamaged = True
                 fighters[1].get_damage()
-                print('1 damaged')
         elif fighters[1].check_damage_ability() is True:
             fighters[1].isDamaged = True
             fighters[0].get_damage()
-            print('0 damaged')
 
     # Перерисовка спрайтов:
     all_sprites.update()

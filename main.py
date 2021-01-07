@@ -35,7 +35,7 @@ def start_game():
     # Данные о поле боя:
     with open(CONFIGURATION_FILE_DIRECTORY, 'w', newline='') as cfg:
         first_fighter = 'scorpion'
-        second_fighter = 'scorpion'
+        second_fighter = 'liukang'
         background = random.choice(GAME_BACKGROUNDS)
         for line in [first_fighter, second_fighter, background]:
             cfg.write(line + '\n')

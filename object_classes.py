@@ -317,7 +317,6 @@ class Fighter(pygame.sprite.Sprite):
                     if DUCK in self.current_actions:
                         self.set_duck(True)
                     elif self.current_animation == self.punch:
-                        print('unpunch')
                         self.set_punch(True)
                     else:
                         self.set_idle()

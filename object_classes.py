@@ -243,6 +243,9 @@ class Fighter(pygame.sprite.Sprite):
     def get_current_actions(self):
         return self.current_actions
 
+    def get_damage(self):
+        self.health -= 7
+
     def new_action(self, action_name):
         # Метод возвращает, выполнено ли запрашиваемое действие
         if self.current_animation == self.idle:
@@ -281,8 +284,6 @@ class Fighter(pygame.sprite.Sprite):
                 self.current_actions.remove(DUCK)
             elif key == BLOCK and BLOCK in self.current_actions:
                 self.current_actions.add(NON_SKIPPABLE_ACTION)
-            elif key == HIT and HIT in self.current_actions:
-                self.current_actions.add(NON_SKIPPABLE_ACTION)
             if self.animation_index > 0:
                 self.current_animation = self.current_animation[self.animation_index - 1::-1]
                 if key == DUCK and BLOCK in self.current_actions:
@@ -315,13 +316,16 @@ class Fighter(pygame.sprite.Sprite):
                 if NON_SKIPPABLE_ACTION in self.current_actions:
                     if DUCK in self.current_actions:
                         self.set_duck(True)
-                    elif HIT in self.current_actions:
-                        self.set_punch()
-                        self.current_actions.remove(HIT)
+                    elif self.current_animation == self.punch:
+                        print('unpunch')
+                        self.set_punch(True)
                     else:
                         self.set_idle()
             else:
                 self.animation_index = (self.animation_index + 1) % len(self.current_animation)
+                if self.current_animation != self.punch and HIT in self.current_actions:
+                    self.current_actions.remove(HIT)
+
             # Разворачиваем картинку, если персонаж должен быть повёрнут:
             if self.image_is_reverted:
                 new_image = pygame.transform.flip(new_image, True, False)
@@ -357,7 +361,7 @@ class Fighter(pygame.sprite.Sprite):
     def check_damage_ability(self):
         if self.isDamaged:
             return False
-        elif not self.isDamaged and self.punch in self.current_animation:
+        elif not self.isDamaged and HIT in self.current_actions:
             return True
 
     def set_idle(self):
@@ -410,12 +414,13 @@ class Fighter(pygame.sprite.Sprite):
         self.current_actions.add(BLOCK)
 
     def set_punch(self, reversed=False):
-        self.current_animation = self.punch
-        self.animation_is_cycled = False
-        self.animation_index = 0
-        self.isDamaged = False
-        self.current_actions.add(HIT)
-        self.current_actions.add(NON_SKIPPABLE_ACTION)
         if reversed:
-            self.current_animation = self.punch[len(self.current_animation) - 1::-1]
-            self.current_actions.remove(HIT)
+            self.current_animation = self.punch[len(self.punch) - 2::-1]
+            self.animation_index = 0
+        else:
+            self.current_animation = self.punch
+            self.animation_is_cycled = False
+            self.animation_index = 0
+            self.isDamaged = False
+            self.current_actions.add(HIT)
+        self.current_actions.add(NON_SKIPPABLE_ACTION)

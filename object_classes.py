@@ -4,6 +4,7 @@ from image_functions import text_to_surface
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 NON_SKIPPABLE_ACTION = 'non-skip'
+DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5}
 
 STANDARD_BUTTON_COLOR = (242, 72, 34)
 STANDARD_SECONDARY_BUTTON_COLOR = (255, 204, 0)
@@ -88,21 +89,6 @@ class Button:
         # Наложение текста на поверхность кнопки:
         self.surface.blit(self.text_surface, ((self.width - self.text_width) // 2,
                                               (self.height - self.text_height) // 2))
-
-    def set_under_mouse_effect(self, mouse_is_on_btn=True):  # Реакция кнопки на наведение мыши
-        self.mouse_is_on_btn = mouse_is_on_btn
-        self.paint()
-
-    def set_text(self, new_text_surface):
-        text_width, text_height = (new_text_surface.get_rect().width,
-                                   new_text_surface.get_rect().height)
-        if text_width > self.width or text_height > self.height:
-            raise SizeError('Размер нового текста превышает размер кнопки')
-        self.text_surface = new_text_surface
-        self.text_width, self.text_height = text_width, text_height
-
-        # Перерисовка кнопки:
-        self.paint()
 
     def set_under_mouse_effect(self, mouse_is_on_btn=True):  # Реакция кнопки на наведение мыши
         self.mouse_is_on_btn = mouse_is_on_btn
@@ -219,6 +205,17 @@ class Fighter(pygame.sprite.Sprite):
                         pygame.image.load(f'data/sprites/{self.character}/punch3.png')]
         self.punch = self.scaled_animation(punch_images)
 
+        duckpunch_images = [pygame.image.load(f'data/sprites/{self.character}/duckpunch1.png'),
+                            pygame.image.load(f'data/sprites/{self.character}/duckpunch2.png'),
+                            pygame.image.load(f'data/sprites/{self.character}/duckpunch3.png')]
+        self.duckpunch = self.scaled_animation(duckpunch_images)
+
+        being_hit_images = [pygame.image.load(f'data/sprites/{self.character}/hit1.png'),
+                            pygame.image.load(f'data/sprites/{self.character}/hit2.png'),
+                            pygame.image.load(f'data/sprites/{self.character}/hit3.png')]
+
+        self.being_hit_images = self.scaled_animation(being_hit_images)
+
         self.position = position
         self.update_image(self.idle[0])
         self.rect.topleft = self.position
@@ -243,8 +240,16 @@ class Fighter(pygame.sprite.Sprite):
     def get_current_actions(self):
         return self.current_actions
 
-    def get_damage(self):
-        self.health -= 7
+    def get_damage(self, enemy_actions):
+        enemy_hit_configuration = ''
+        enemy_hit_configuration += DUCK if DUCK in enemy_actions else ''
+        enemy_hit_configuration += JUMP if JUMP in enemy_actions else ''
+        enemy_hit_configuration += HIT if HIT in enemy_actions else ''
+        enemy_hit_configuration += KICK if KICK in enemy_actions else ''
+        damage_value = DAMAGES_DICT[enemy_hit_configuration]
+        if BLOCK in self.current_actions:  # Если у данного игрока блок, то урон вдвое меньше
+            damage_value //= 2
+        self.health -= damage_value
 
     def new_action(self, action_name):
         # Метод возвращает, выполнено ли запрашиваемое действие
@@ -261,18 +266,24 @@ class Fighter(pygame.sprite.Sprite):
                 self.set_punch()
                 return True
         elif self.current_actions < {LEFT, RIGHT, DUCK}:
-            if action_name == BLOCK:
-                if self.current_actions < {LEFT, RIGHT}:
+            if self.current_actions < {LEFT, RIGHT}:
+                if action_name == BLOCK:
                     self.set_block()
                     return True
-                elif self.current_actions == {DUCK}:
-                    if self.animation_index == len(self.current_animation) - 1:
+                elif action_name == HIT:
+                    self.set_idle()
+                    self.set_punch()
+                    return True
+            elif self.current_actions == {DUCK}:
+                # Игрок может делать другие действия только, если полностью сел:
+                if self.animation_index == len(self.current_animation) - 1:
+                    if action_name == BLOCK:
                         self.set_duckblock()
                         return True
-            else:
-                # Позже сидя можно будет биться и ставить блок
-                pass
-        return False
+                    elif action_name == HIT:
+                        self.set_duckpunch()
+                        return True
+            return False
 
     def stop_action(self, key):
         if self.current_animation in [self.walk, self.walk[::-1]] and key in [RIGHT, LEFT]:
@@ -291,6 +302,9 @@ class Fighter(pygame.sprite.Sprite):
                 self.animation_index = 0
             else:
                 if key == DUCK and BLOCK in self.current_actions:
+                    self.current_animation = self.duck[::-1] + [self.idle[0]]
+                    self.animation_index = 0
+                elif key == DUCK and HIT in self.current_actions:
                     self.current_animation = self.duck[::-1] + [self.idle[0]]
                     self.animation_index = 0
                 elif key == BLOCK and DUCK in self.current_actions:
@@ -314,15 +328,18 @@ class Fighter(pygame.sprite.Sprite):
             if (self.animation_index == len(self.current_animation) - 1) \
                     and not self.animation_is_cycled:
                 if NON_SKIPPABLE_ACTION in self.current_actions:
-                    if DUCK in self.current_actions:
-                        self.set_duck(True)
-                    elif self.current_animation == self.punch:
+                    if self.current_animation == self.punch:
                         self.set_punch(True)
+                    elif self.current_animation == self.duckpunch:
+                        self.set_duckpunch(True)
+                    elif DUCK in self.current_actions:  # Это условие должно быть предпоследним
+                        self.set_duck(True)
                     else:
                         self.set_idle()
             else:
                 self.animation_index = (self.animation_index + 1) % len(self.current_animation)
-                if self.current_animation != self.punch and HIT in self.current_actions:
+                if self.current_animation not in (self.punch, self.duckpunch) \
+                        and HIT in self.current_actions:
                     self.current_actions.remove(HIT)
 
             # Разворачиваем картинку, если персонаж должен быть повёрнут:
@@ -418,6 +435,18 @@ class Fighter(pygame.sprite.Sprite):
             self.animation_index = 0
         else:
             self.current_animation = self.punch
+            self.animation_is_cycled = False
+            self.animation_index = 0
+            self.isDamaged = False
+            self.current_actions.add(HIT)
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
+
+    def set_duckpunch(self, reversed=False):
+        if reversed:
+            self.current_animation = self.duckpunch[len(self.duckpunch) - 2::-1]
+            self.animation_index = 0
+        else:
+            self.current_animation = self.duckpunch
             self.animation_is_cycled = False
             self.animation_index = 0
             self.isDamaged = False

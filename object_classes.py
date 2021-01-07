@@ -158,7 +158,10 @@ class Fighter(pygame.sprite.Sprite):
 
         self.fightSounds = {
             HIT: pygame.mixer.Sound('data/sounds/punches_kicks/punch.mp3'),
-            KICK: pygame.mixer.Sound('data/sounds/punches_kicks/kick.mp3')
+            KICK: pygame.mixer.Sound('data/sounds/punches_kicks/kick.mp3'),
+            BLOCK: pygame.mixer.Sound('data/sounds/punches_kicks/block.mp3'),
+            JUMP: pygame.mixer.Sound('data/sounds/punches_kicks/jump.mp3'),
+            DUCK: pygame.mixer.Sound('data/sounds/punches_kicks/duck.mp3')
         }
 
         self.animation_delay = FPS / 60 * 10  # Задержка перед следующей картинкой анимации

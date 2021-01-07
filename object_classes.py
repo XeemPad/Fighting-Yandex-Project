@@ -342,9 +342,12 @@ class Fighter(pygame.sprite.Sprite):
                         and HIT in self.current_actions:
                     self.current_actions.remove(HIT)
 
-            # Разворачиваем картинку, если персонаж должен быть повёрнут:
+            # Разворачиваем картинку, если персонаж должен быть повёрнут, обновляем координаты:
             if self.image_is_reverted:
                 new_image = pygame.transform.flip(new_image, True, False)
+                self.position = self.rect.topright
+            else:
+                self.position = self.rect.topleft
             self.update_image(new_image)  # Установка новой картинки
 
             if JUMP not in self.current_actions:
@@ -353,11 +356,6 @@ class Fighter(pygame.sprite.Sprite):
             if ((0 < (self.rect.x + round(self.current_x_speed / self.animation_delay))
                  < WINDOW_WIDTH - fighter_width)):
                 self.rect.x += round(self.current_x_speed / self.animation_delay)
-
-        if self.image_is_reverted:
-            self.position = self.rect.topright
-        else:
-            self.position = self.rect.topleft
 
     def update_image(self, new_image):
         self.image = new_image
@@ -371,8 +369,10 @@ class Fighter(pygame.sprite.Sprite):
     def revert(self):
         if self.image_is_reverted:
             self.image_is_reverted = False
+            self.position = self.rect.topright
         else:
             self.image_is_reverted = True
+            self.position = self.rect.topleft
 
     def check_damage_ability(self):
         if self.isDamaged:

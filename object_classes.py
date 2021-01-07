@@ -1,4 +1,5 @@
 import pygame
+from pygame import mixer
 from main import FPS, WINDOW_WIDTH
 from image_functions import text_to_surface
 
@@ -155,6 +156,11 @@ class Fighter(pygame.sprite.Sprite):
         self.health = 100
         self.image_is_reverted = False
 
+        self.fightSounds = {
+            HIT: pygame.mixer.Sound('data/sounds/punches_kicks/punch.mp3'),
+            KICK: pygame.mixer.Sound('data/sounds/punches_kicks/kick.mp3')
+        }
+
         self.animation_delay = FPS / 60 * 10  # Задержка перед следующей картинкой анимации
         self.frames_count = 0
 
@@ -250,6 +256,7 @@ class Fighter(pygame.sprite.Sprite):
         if BLOCK in self.current_actions:  # Если у данного игрока блок, то урон вдвое меньше
             damage_value //= 2
         self.health -= damage_value
+        self.fightSounds[enemy_hit_configuration].play()
 
     def new_action(self, action_name):
         # Метод возвращает, выполнено ли запрашиваемое действие

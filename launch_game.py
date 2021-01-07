@@ -46,6 +46,8 @@ RESTART_BTN_TEXT_SIZE = round(36 * (WINDOW_WIDTH / 1024))
 RESTART_BTN_COLOR = (247, 148, 60)
 RESTART_BTN_SECONDARY_COLOR = (255, 43, 43)
 
+fightSound = pygame.mixer.Sound('data/sounds/fight.mp3')
+
 buttons = []
 music_volume = 0.05
 is_paused = False
@@ -171,6 +173,9 @@ for num, bar in enumerate(hp_bars):  # Отрисовка полосок со з
     window.blit(bar.get_surface(), coords)
 window.blit(pause_btn.get_surface(), pause_btn_coords)  # Отрисовка кнопки паузы
 window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
+
+fightSound.play()  # Звук Начала боя
+
 pygame.display.flip()
 pause_or_unpause(False)  # Ставим игру на паузу
 frames_on_pause_count = 0

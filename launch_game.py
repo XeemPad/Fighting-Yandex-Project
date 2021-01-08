@@ -102,6 +102,7 @@ def game_over(winner=None):
     fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 7 * 2)
     if winner.character == 'scorpion':
         pygame.mixer.Sound('data/sounds/wins/scorpion_wins.mp3').play()
+        pygame.mixer.Sound('data/sounds/scorpion/get_over_here.mp3').play()
     elif winner.character == 'liukang':
         pygame.mixer.Sound('data/sounds/wins/luikang_wins.mp3').play()
 
@@ -191,7 +192,7 @@ arenaSound.play()
 fightSound.play()  # Звуки Начала боя
 
 if fighters[0].character == 'scorpion' or fighters[1].character == 'scorpion':
-    scorpionSounds[1].play()
+    scorpionSounds[0].play()
 
 pygame.display.flip()
 pause_or_unpause(False)  # Ставим игру на паузу

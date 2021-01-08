@@ -1,6 +1,8 @@
 import pygame
-from main import FPS, WINDOW_WIDTH
+from main import FPS, WINDOW_WIDTH, sounds_volume
 from image_functions import text_to_surface
+
+pygame.init()
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 NON_SKIPPABLE_ACTION = 'non-skip'
@@ -9,6 +11,10 @@ DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5, KICK: 12, DUCK + KICK: 3}
 STANDARD_BUTTON_COLOR = (242, 72, 34)
 STANDARD_SECONDARY_BUTTON_COLOR = (255, 204, 0)
 HORIZONTAL_INDENT, VERTICAL_INDENT = 12, 15
+BUTTON_SOUNDS_DIRECTORIES = ['data/sounds/ui/btn_hovered.mp3', 'data/sounds/ui/btn_triggered.mp3']
+button_sounds = [pygame.mixer.Sound(sound) for sound in BUTTON_SOUNDS_DIRECTORIES]
+for sound in button_sounds:
+    sound.set_volume(sounds_volume)
 
 IMAGE_SCALE_VALUE = round((WINDOW_WIDTH / 1024) * 2)
 fighter_width = 63 * IMAGE_SCALE_VALUE
@@ -17,9 +23,6 @@ PLAYER_NAME_FONT_DIRECTORY = 'data/font2.ttf'
 PLAYER_NAME_FONT_SIZE = 28
 
 HEALTH_COLOR = (0, 255, 0)
-
-
-pygame.init()
 
 
 class SizeError(ValueError):
@@ -67,6 +70,7 @@ class Button:
         self.position_set = True
 
     def trigger(self):
+        button_sounds[1].play()  # Звук нажатия
         self.function()
 
     def check_mouse_position(self, mouse_pos):
@@ -91,6 +95,8 @@ class Button:
                                               (self.height - self.text_height) // 2))
 
     def set_under_mouse_effect(self, mouse_is_on_btn=True):  # Реакция кнопки на наведение мыши
+        if self.mouse_is_on_btn is False and mouse_is_on_btn:
+            button_sounds[0].play()  # Звук наведения
         self.mouse_is_on_btn = mouse_is_on_btn
         self.paint()
 

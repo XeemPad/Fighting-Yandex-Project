@@ -4,7 +4,7 @@ from image_functions import text_to_surface
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 NON_SKIPPABLE_ACTION = 'non-skip'
-DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5, KICK: 12}
+DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5, KICK: 12, DUCK + KICK: 3}
 
 STANDARD_BUTTON_COLOR = (242, 72, 34)
 STANDARD_SECONDARY_BUTTON_COLOR = (255, 204, 0)
@@ -292,7 +292,8 @@ class Fighter(pygame.sprite.Sprite):
             enemy_hit_configuration += KICK
             self.fightSounds[KICK].play()
         damage_value = DAMAGES_DICT[enemy_hit_configuration]
-        if BLOCK in self.current_actions:  # Если у данного игрока блок, то урон вдвое меньше
+        # Если у данного игрока блок, то урон вдвое меньше, кроме подсечки:
+        if BLOCK in self.current_actions and enemy_hit_configuration != DUCK + KICK:
             damage_value //= 2
         self.health -= damage_value
         # Ставим анимацию реакции на удар, если у игрока не было блока:
@@ -356,10 +357,13 @@ class Fighter(pygame.sprite.Sprite):
                     self.current_animation.extend(self.duck[::-1] + [self.idle[0]])
                 # Если кнопка сидения отпущена во время удара:
                 elif (key == DUCK and self.current_animation in
-                      [self.duckpunch, self.duckpunch[len(self.duckpunch) - 2::-1]]):
+                      [self.duckpunch, self.duckpunch[len(self.duckpunch) - 2::-1],
+                       self.duckkick, self.duckkick[len(self.duckkick) - 2::-1]]):
                     self.current_animation = self.duck[::-1] + [self.idle[0]]
                     if HIT in self.current_actions:
                         self.current_actions.remove(HIT)
+                    if KICK in self.current_actions:
+                        self.current_actions.remove(KICK)
                 self.animation_index = 0
             else:
                 if key == DUCK and BLOCK in self.current_actions:
@@ -367,11 +371,14 @@ class Fighter(pygame.sprite.Sprite):
                     self.animation_index = 0
                 # Если кнопка сидения отпущена во время удара:
                 elif (key == DUCK and self.current_animation in
-                      [self.duckpunch, self.duckpunch[len(self.duckpunch) - 2::-1]]):
+                      [self.duckpunch, self.duckpunch[len(self.duckpunch) - 2::-1],
+                       self.duckkick, self.duckkick[len(self.duckkick) - 2::-1]]):
                     self.current_animation = self.duck[::-1] + [self.idle[0]]
                     self.animation_index = 0
                     if HIT in self.current_actions:
                         self.current_actions.remove(HIT)
+                    if KICK in self.current_actions:
+                        self.current_actions.remove(KICK)
                 elif key == BLOCK and DUCK in self.current_actions:
                     self.set_duck(True)
                 else:
@@ -399,6 +406,8 @@ class Fighter(pygame.sprite.Sprite):
                         self.set_duckpunch(True)
                     elif self.current_animation == self.kick:
                         self.set_kick(True)
+                    elif self.current_animation == self.duckkick:
+                        self.set_duckkick(True)
                     elif DUCK in self.current_actions:  # Это условие должно быть предпоследним
                         self.set_duck(True)
                     else:
@@ -455,8 +464,8 @@ class Fighter(pygame.sprite.Sprite):
                     return True
             elif KICK in self.current_actions:
                 if (self.animation_index > 0 or
-                        self.current_animation in [self.punch[len(self.kick) - 2::-1],
-                                                   self.duckpunch[len(self.duckkick) - 2::-1]]):
+                        self.current_animation in [self.kick[len(self.kick) - 2::-1],
+                                                   self.duckkick[len(self.duckkick) - 2::-1]]):
                     return True
         return False
 
@@ -549,7 +558,16 @@ class Fighter(pygame.sprite.Sprite):
         self.current_actions.add(NON_SKIPPABLE_ACTION)
 
     def set_duckkick(self, reversed=False):
-        pass
+        if reversed:
+            self.current_animation = self.duckkick[len(self.duckkick) - 2::-1]
+            self.animation_index = 0
+        else:
+            self.current_animation = self.duckkick
+            self.animation_is_cycled = False
+            self.animation_index = 0
+            self.isDamaged = False
+            self.current_actions.add(KICK)
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
 
     def set_being_hit(self):
         self.current_animation = self.being_hit

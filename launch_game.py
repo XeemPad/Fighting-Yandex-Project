@@ -48,11 +48,16 @@ RESTART_BTN_TEXT_SIZE = round(36 * (WINDOW_WIDTH / 1024))
 RESTART_BTN_COLOR = (247, 148, 60)
 RESTART_BTN_SECONDARY_COLOR = (255, 43, 43)
 
+WIN_SOUNDS_DICT = {'scorpion': 'data/sounds/wins/scorpion_wins.mp3',
+                   'liukang': 'data/sounds/wins/liukang_wins.mp3'}
+
 fightSound = pygame.mixer.Sound('data/sounds/fight.mp3')
 fightSound.set_volume(sounds_volume)
 
 scorpionSounds = [pygame.mixer.Sound('data/sounds/scorpion/come_here.mp3'),
                   pygame.mixer.Sound('data/sounds/scorpion/get_over_here.mp3')]
+for sound in scorpionSounds:
+    sound.set_volume(sounds_volume)
 
 buttons = []
 music_volume = 0.05
@@ -101,10 +106,7 @@ def game_over(winner=None):
                                                                font_directory=FONT_DIRECTORY,
                                                                italic=True)
     fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 7 * 2)
-    if winner.character == 'scorpion':
-        pygame.mixer.Sound('data/sounds/wins/scorpion_wins.mp3').play()
-    elif winner.character == 'liukang':
-        pygame.mixer.Sound('data/sounds/wins/luikang_wins.mp3').play()
+    pygame.mixer.Sound(WIN_SOUNDS_DICT[winner.character]).play()
 
     window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
 
@@ -191,12 +193,13 @@ window.blit(fight_info_text, fight_info_coords)  # Наложение текст
 arenaSound.play()
 fightSound.play()  # Звуки Начала боя
 
+pygame.display.flip()
+
 pygame.time.delay(1000)
 
 if fighters[0].character == 'scorpion' or fighters[1].character == 'scorpion':
     scorpionSounds[0].play()
 
-pygame.display.flip()
 pause_or_unpause(False)  # Ставим игру на паузу
 frames_on_pause_count = 0
 

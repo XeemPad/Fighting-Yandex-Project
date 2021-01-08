@@ -194,11 +194,6 @@ fightSound.play()  # Звуки Начала боя
 
 pygame.display.flip()
 
-pygame.time.delay(1000)
-
-if fighters[0].character == 'scorpion' or fighters[1].character == 'scorpion':
-    scorpionSounds[0].play()
-
 # Музыка:
 music.load(random.choice(MUSIC_DIRECTORIES))
 music.set_volume(music_volume)
@@ -212,6 +207,9 @@ while running:
     while is_paused:  # Во время паузы ставим изменённый цикл
         if frames_on_pause_count == FPS:  # Если с момента паузы прошла 1 секунда
             pause_or_unpause(False)  # Снимаем с паузы игру
+            if fighters[0].character == 'scorpion' or fighters[1].character == 'scorpion':
+                scorpionSounds[0].play()
+
         # Обработка событий:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

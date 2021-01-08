@@ -219,11 +219,30 @@ class Fighter(pygame.sprite.Sprite):
                             pygame.image.load(f'data/sprites/{self.character}/duckpunch3.png')]
         self.duckpunch = self.scaled_animation(duckpunch_images)
 
+        # Списки будут сразу с реверсами:
         being_hit_images = [pygame.image.load(f'data/sprites/{self.character}/hit1.png'),
                             pygame.image.load(f'data/sprites/{self.character}/hit2.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/hit3.png')]
+                            pygame.image.load(f'data/sprites/{self.character}/hit3.png'),
+                            pygame.image.load(f'data/sprites/{self.character}/hit2.png'),
+                            pygame.image.load(f'data/sprites/{self.character}/hit1.png')]
 
-        self.being_hit_images = self.scaled_animation(being_hit_images)
+        self.being_hit = self.scaled_animation(being_hit_images)
+
+        being_hitdown_images = [pygame.image.load(f'data/sprites/{self.character}/hitdown1.png'),
+                                pygame.image.load(f'data/sprites/{self.character}/hitdown2.png'),
+                                pygame.image.load(f'data/sprites/{self.character}/hitdown3.png'),
+                                pygame.image.load(f'data/sprites/{self.character}/hitdown2.png'),
+                                pygame.image.load(f'data/sprites/{self.character}/hitdown1.png')]
+
+        self.being_hitdown = self.scaled_animation(being_hitdown_images)
+
+        being_duckhit_images = [pygame.image.load(f'data/sprites/{self.character}/duckhit1.png'),
+                                pygame.image.load(f'data/sprites/{self.character}/duckhit2.png'),
+                                pygame.image.load(f'data/sprites/{self.character}/duckhit3.png'),
+                                pygame.image.load(f'data/sprites/{self.character}/duckhit2.png'),
+                                pygame.image.load(f'data/sprites/{self.character}/duckhit1.png')]
+
+        self.being_duckhit = self.scaled_animation(being_duckhit_images)
 
         self.position = position
         self.update_image(self.idle[0])
@@ -259,7 +278,15 @@ class Fighter(pygame.sprite.Sprite):
         if BLOCK in self.current_actions:  # Если у данного игрока блок, то урон вдвое меньше
             damage_value //= 2
         self.health -= damage_value
-        self.fightSounds[enemy_hit_configuration].play()
+        # Ставим анимацию реакции на удар, если у игрока не было блока:
+        if BLOCK not in self.current_actions:
+            if DUCK in self.current_actions:
+                self.set_being_duckhit()
+            else:
+                if DUCK in enemy_actions:
+                    self.set_being_hitdown()
+                else:
+                    self.set_being_hit()
 
     def new_action(self, action_name):
         # Метод возвращает, выполнено ли запрашиваемое действие
@@ -298,8 +325,8 @@ class Fighter(pygame.sprite.Sprite):
     def stop_action(self, key):
         if self.current_animation in [self.walk, self.walk[::-1]] and key in [RIGHT, LEFT]:
             self.set_idle()
-        elif (self.current_animation in [self.duck, self.block, self.duckblock] and
-              key in [DUCK, BLOCK]):  # Список неполный
+        elif self.current_actions & {DUCK, BLOCK} and key in [DUCK, BLOCK]:
+            print(self.current_actions)
             if key == DUCK and DUCK in self.current_actions:
                 self.current_actions.add(NON_SKIPPABLE_ACTION)
                 self.current_actions.remove(DUCK)
@@ -309,14 +336,24 @@ class Fighter(pygame.sprite.Sprite):
                 self.current_animation = self.current_animation[self.animation_index - 1::-1]
                 if key == DUCK and BLOCK in self.current_actions:
                     self.current_animation.extend(self.duck[::-1] + [self.idle[0]])
+                # Если кнопка сидения отпущена во время удара:
+                elif (key == DUCK and self.current_animation in
+                      [self.duckpunch, self.duckpunch[len(self.duckpunch) - 2::-1]]):
+                    self.current_animation = self.duck[::-1] + [self.idle[0]]
+                    if HIT in self.current_actions:
+                        self.current_actions.remove(HIT)
                 self.animation_index = 0
             else:
                 if key == DUCK and BLOCK in self.current_actions:
                     self.current_animation = self.duck[::-1] + [self.idle[0]]
                     self.animation_index = 0
-                elif key == DUCK and HIT in self.current_actions:
+                # Если кнопка сидения отпущена во время удара:
+                elif (key == DUCK and self.current_animation in
+                      [self.duckpunch, self.duckpunch[len(self.duckpunch) - 2::-1]]):
                     self.current_animation = self.duck[::-1] + [self.idle[0]]
                     self.animation_index = 0
+                    if HIT in self.current_actions:
+                        self.current_actions.remove(HIT)
                 elif key == BLOCK and DUCK in self.current_actions:
                     self.set_duck(True)
                 else:
@@ -388,7 +425,12 @@ class Fighter(pygame.sprite.Sprite):
         if self.isDamaged:
             return False
         elif not self.isDamaged and HIT in self.current_actions:
-            return True
+            # Если self.animation_index > 0, значит, что первая картинка удара уже была установлена
+            # Или если удар начал возвращаться, но HIT in self.current_actions
+            if (self.animation_index > 0 or
+                    self.current_animation in [self.punch[len(self.punch) - 2::-1],
+                                               self.duckpunch[len(self.duckpunch) - 2::-1]]):
+                return True
 
     def set_idle(self):
         self.current_animation = self.idle
@@ -461,4 +503,22 @@ class Fighter(pygame.sprite.Sprite):
             self.animation_index = 0
             self.isDamaged = False
             self.current_actions.add(HIT)
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
+
+    def set_being_hit(self):
+        self.current_animation = self.being_hit
+        self.animation_is_cycled = False
+        self.animation_index = 0
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
+
+    def set_being_hitdown(self):
+        self.current_animation = self.being_hitdown
+        self.animation_is_cycled = False
+        self.animation_index = 0
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
+
+    def set_being_duckhit(self):
+        self.current_animation = self.being_duckhit
+        self.animation_is_cycled = False
+        self.animation_index = 0
         self.current_actions.add(NON_SKIPPABLE_ACTION)

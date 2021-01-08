@@ -102,6 +102,7 @@ def game_over(winner=None):
     fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 7 * 2)
     if winner.character == 'scorpion':
         pygame.mixer.Sound('data/sounds/wins/scorpion_wins.mp3').play()
+        pygame.time.delay(2000)
         pygame.mixer.Sound('data/sounds/scorpion/get_over_here.mp3').play()
     elif winner.character == 'liukang':
         pygame.mixer.Sound('data/sounds/wins/luikang_wins.mp3').play()

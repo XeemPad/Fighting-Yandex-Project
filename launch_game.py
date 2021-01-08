@@ -141,7 +141,7 @@ fighters = [Fighter(all_sprites, fighter1_char, (FIGHTERS_X[0], FIGHTERS_Y)),
 fighter_at_left = fighters[0]  # Персонаж, стоящий слева
 fighters[1].revert()  # Поворачиваем второго игрока к центру
 
-# Создание полосок здоровья пперсонажей(с координатами в данном окне):
+# Создание полосок здоровья персонажей(с координатами в данном окне):
 hp_bars = [HealthBar(f'{PLAYERNAMES[0]} ({fighter1_char})', True),
            HealthBar(f'{PLAYERNAMES[1]} ({fighter2_char})', False)]
 bars_coords = (HEALTH_BAR_INDENT,

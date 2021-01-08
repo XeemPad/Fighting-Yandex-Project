@@ -1,5 +1,4 @@
 import pygame
-from pygame import mixer
 from main import FPS, WINDOW_WIDTH
 from image_functions import text_to_surface
 
@@ -325,13 +324,16 @@ class Fighter(pygame.sprite.Sprite):
                     elif action_name == HIT:
                         self.set_duckpunch()
                         return True
-            return False
+        elif JUMP in self.current_actions:
+            if action_name == LEFT or action_name == RIGHT:
+                self.set_walk(action_name, is_jumping=True)
+                return True
+        return False
 
     def stop_action(self, key):
         if self.current_animation in [self.walk, self.walk[::-1]] and key in [RIGHT, LEFT]:
             self.set_idle()
         elif self.current_actions & {DUCK, BLOCK} and key in [DUCK, BLOCK]:
-            print(self.current_actions)
             if key == DUCK and DUCK in self.current_actions:
                 self.current_actions.add(NON_SKIPPABLE_ACTION)
                 self.current_actions.remove(DUCK)
@@ -446,23 +448,26 @@ class Fighter(pygame.sprite.Sprite):
 
         self.current_actions = set()
 
-    def set_walk(self, direction):
+    def set_walk(self, direction, is_jumping=False):
         if direction == RIGHT:
-            if self.image_is_reverted:
-                # Персонаж идёт задом:
-                self.current_animation = self.walk[::-1]
-            else:
-                self.current_animation = self.walk
+            if not is_jumping:
+                if self.image_is_reverted:
+                    # Персонаж идёт задом:
+                    self.current_animation = self.walk[::-1]
+                else:
+                    self.current_animation = self.walk
             self.current_x_speed = self.x_speed
         else:
-            if self.image_is_reverted:
-                # Персонаж идёт задом:
-                self.current_animation = self.walk
-            else:
-                self.current_animation = self.walk[::-1]
+            if not is_jumping:
+                if self.image_is_reverted:
+                    # Персонаж идёт задом:
+                    self.current_animation = self.walk
+                else:
+                    self.current_animation = self.walk[::-1]
             self.current_x_speed = -self.x_speed
-        self.animation_is_cycled = True
-        self.animation_index = 0
+        if not is_jumping:
+            self.animation_is_cycled = True
+            self.animation_index = 0
 
         self.current_actions.add(direction)
 

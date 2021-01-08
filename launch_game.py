@@ -191,6 +191,8 @@ window.blit(fight_info_text, fight_info_coords)  # Наложение текст
 arenaSound.play()
 fightSound.play()  # Звуки Начала боя
 
+pygame.time.delay(1000)
+
 if fighters[0].character == 'scorpion' or fighters[1].character == 'scorpion':
     scorpionSounds[0].play()
 

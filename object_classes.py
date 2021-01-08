@@ -272,8 +272,13 @@ class Fighter(pygame.sprite.Sprite):
         enemy_hit_configuration = ''
         enemy_hit_configuration += DUCK if DUCK in enemy_actions else ''
         enemy_hit_configuration += JUMP if JUMP in enemy_actions else ''
-        enemy_hit_configuration += HIT if HIT in enemy_actions else ''
-        enemy_hit_configuration += KICK if KICK in enemy_actions else ''
+        if HIT in enemy_actions:
+            enemy_hit_configuration += HIT
+            # Звук удара:
+            self.fightSounds[HIT].play()
+        if KICK in enemy_actions:
+            enemy_hit_configuration += KICK
+            self.fightSounds[KICK].play()
         damage_value = DAMAGES_DICT[enemy_hit_configuration]
         if BLOCK in self.current_actions:  # Если у данного игрока блок, то урон вдвое меньше
             damage_value //= 2

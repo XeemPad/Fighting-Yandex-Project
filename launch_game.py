@@ -19,6 +19,8 @@ BACKGROUND_DIRECTORIES = {'background1': 'data/backgrounds/background1.jpg',
 MUSIC_DIRECTORIES = ['data/sounds/bg_music/music_one.mp3', 'data/sounds/bg_music/music_two.mp3',
                      'data/sounds/bg_music/music_three.mp3']
 
+ARENA_SOUNDS = ['data/sounds/arena1.mp3', 'data/sounds/arena2.mp3']
+
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.K_w,
             HIT: pygame.K_g, KICK: pygame.K_h, BLOCK: pygame.K_j},  # Управление первого игрока
@@ -48,6 +50,9 @@ RESTART_BTN_SECONDARY_COLOR = (255, 43, 43)
 
 fightSound = pygame.mixer.Sound('data/sounds/fight.mp3')
 fightSound.set_volume(sounds_volume)
+
+scorpionSounds = [pygame.mixer.Sound('data/sounds/scorpion/come_here.mp3'),
+                  pygame.mixer.Sound('data/sounds/scorpion/get_over_here.mp3')]
 
 buttons = []
 music_volume = 0.05
@@ -96,6 +101,11 @@ def game_over(winner=None):
                                                                font_directory=FONT_DIRECTORY,
                                                                italic=True)
     fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 7 * 2)
+    if winner.character == 'scorpion':
+        pygame.mixer.Sound('data/sounds/wins/scorpion_wins.mp3').play()
+        pygame.mixer.Sound('data/sounds/scorpion/get_over_here.mp3').play()
+    elif winner.character == 'liukang':
+        pygame.mixer.Sound('data/sounds/wins/luikang_wins.mp3').play()
 
     window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
 
@@ -131,6 +141,9 @@ location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
 music.load(random.choice(MUSIC_DIRECTORIES))
 music.set_volume(music_volume)
 music.play(-1)
+
+# Звук перед началом боя
+arenaSound = pygame.mixer.Sound(random.choice(ARENA_SOUNDS))
 
 # Группы спрайтов:
 all_sprites = pygame.sprite.Group()
@@ -175,7 +188,12 @@ for num, bar in enumerate(hp_bars):  # Отрисовка полосок со з
 window.blit(pause_btn.get_surface(), pause_btn_coords)  # Отрисовка кнопки паузы
 window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
 
-fightSound.play()  # Звук Начала боя
+
+arenaSound.play()
+fightSound.play()  # Звуки Начала боя
+
+if fighters[0].character == 'scorpion' or fighters[1].character == 'scorpion':
+    scorpionSounds[0].play()
 
 pygame.display.flip()
 pause_or_unpause(False)  # Ставим игру на паузу

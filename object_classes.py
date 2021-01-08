@@ -4,7 +4,7 @@ from image_functions import text_to_surface
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
 NON_SKIPPABLE_ACTION = 'non-skip'
-DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5}
+DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5, KICK: 12}
 
 STANDARD_BUTTON_COLOR = (242, 72, 34)
 STANDARD_SECONDARY_BUTTON_COLOR = (255, 204, 0)
@@ -163,7 +163,7 @@ class Fighter(pygame.sprite.Sprite):
             DUCK: pygame.mixer.Sound('data/sounds/punches_kicks/duck.mp3')
         }
 
-        self.animation_delay = FPS / 60 * 10  # Задержка перед следующей картинкой анимации
+        self.animation_delay = FPS / 60 * 5  # Задержка перед следующей картинкой анимации
         self.frames_count = 0
 
         idle_images = [pygame.image.load(f'data/sprites/{self.character}/idle1.png'),
@@ -217,6 +217,19 @@ class Fighter(pygame.sprite.Sprite):
                             pygame.image.load(f'data/sprites/{self.character}/duckpunch2.png'),
                             pygame.image.load(f'data/sprites/{self.character}/duckpunch3.png')]
         self.duckpunch = self.scaled_animation(duckpunch_images)
+
+        kick_images = [pygame.image.load(f'data/sprites/{self.character}/kick1.png'),
+                        pygame.image.load(f'data/sprites/{self.character}/kick2.png'),
+                        pygame.image.load(f'data/sprites/{self.character}/kick3.png'),
+                        pygame.image.load(f'data/sprites/{self.character}/kick4.png'),
+                        pygame.image.load(f'data/sprites/{self.character}/kick5.png'),
+                        pygame.image.load(f'data/sprites/{self.character}/kick6.png')]
+        self.kick = self.scaled_animation(kick_images)
+
+        duckkick_images = [pygame.image.load(f'data/sprites/{self.character}/duckkick1.png'),
+                           pygame.image.load(f'data/sprites/{self.character}/duckkick2.png'),
+                           pygame.image.load(f'data/sprites/{self.character}/duckkick3.png')]
+        self.duckkick = self.scaled_animation(duckkick_images)
 
         # Списки будут сразу с реверсами:
         being_hit_images = [pygame.image.load(f'data/sprites/{self.character}/hit1.png'),
@@ -297,38 +310,36 @@ class Fighter(pygame.sprite.Sprite):
         if self.current_animation == self.idle:
             if action_name == LEFT or action_name == RIGHT:
                 self.set_walk(action_name)
-                return True
             elif action_name == DUCK:
                 self.set_duck()
-                return True
             elif action_name == BLOCK:
                 self.set_block()
             elif action_name == HIT:
                 self.set_punch()
-                return True
+            elif action_name == KICK:
+                self.set_kick()
         elif self.current_actions < {LEFT, RIGHT, DUCK}:
             if self.current_actions < {LEFT, RIGHT}:
                 if action_name == BLOCK:
                     self.set_block()
-                    return True
                 elif action_name == HIT:
                     self.set_idle()
                     self.set_punch()
-                    return True
+                elif action_name == KICK:
+                    self.set_idle()
+                    self.set_kick()
             elif self.current_actions == {DUCK}:
                 # Игрок может делать другие действия только, если полностью сел:
                 if self.animation_index == len(self.current_animation) - 1:
                     if action_name == BLOCK:
                         self.set_duckblock()
-                        return True
                     elif action_name == HIT:
                         self.set_duckpunch()
-                        return True
+                    elif action_name == KICK:
+                        self.set_duckkick()
         elif JUMP in self.current_actions:
             if action_name == LEFT or action_name == RIGHT:
                 self.set_walk(action_name, is_jumping=True)
-                return True
-        return False
 
     def stop_action(self, key):
         if self.current_animation in [self.walk, self.walk[::-1]] and key in [RIGHT, LEFT]:
@@ -386,6 +397,8 @@ class Fighter(pygame.sprite.Sprite):
                         self.set_punch(True)
                     elif self.current_animation == self.duckpunch:
                         self.set_duckpunch(True)
+                    elif self.current_animation == self.kick:
+                        self.set_kick(True)
                     elif DUCK in self.current_actions:  # Это условие должно быть предпоследним
                         self.set_duck(True)
                     else:
@@ -395,6 +408,9 @@ class Fighter(pygame.sprite.Sprite):
                 if self.current_animation not in (self.punch, self.duckpunch) \
                         and HIT in self.current_actions:
                     self.current_actions.remove(HIT)
+                if self.current_animation not in (self.kick, self.duckkick) \
+                        and KICK in self.current_actions:
+                    self.current_actions.remove(KICK)
 
             # Разворачиваем картинку, если персонаж должен быть повёрнут, обновляем координаты:
             if self.image_is_reverted:
@@ -429,15 +445,20 @@ class Fighter(pygame.sprite.Sprite):
             self.position = self.rect.topleft
 
     def check_damage_ability(self):
-        if self.isDamaged:
-            return False
-        elif not self.isDamaged and HIT in self.current_actions:
-            # Если self.animation_index > 0, значит, что первая картинка удара уже была установлена
-            # Или если удар начал возвращаться, но HIT in self.current_actions
-            if (self.animation_index > 0 or
-                    self.current_animation in [self.punch[len(self.punch) - 2::-1],
-                                               self.duckpunch[len(self.duckpunch) - 2::-1]]):
-                return True
+        if not self.isDamaged:
+            if HIT in self.current_actions:
+                # Если первая картинка удара уже была установлена
+                # Или если удар начал возвращаться, но HIT in self.current_actions
+                if (self.animation_index > 0 or
+                        self.current_animation in [self.punch[len(self.punch) - 2::-1],
+                                                   self.duckpunch[len(self.duckpunch) - 2::-1]]):
+                    return True
+            elif KICK in self.current_actions:
+                if (self.animation_index > 0 or
+                        self.current_animation in [self.punch[len(self.kick) - 2::-1],
+                                                   self.duckpunch[len(self.duckkick) - 2::-1]]):
+                    return True
+        return False
 
     def set_idle(self):
         self.current_animation = self.idle
@@ -514,6 +535,21 @@ class Fighter(pygame.sprite.Sprite):
             self.isDamaged = False
             self.current_actions.add(HIT)
         self.current_actions.add(NON_SKIPPABLE_ACTION)
+
+    def set_kick(self, reversed=False):
+        if reversed:
+            self.current_animation = self.kick[len(self.kick) - 2::-1]
+            self.animation_index = 0
+        else:
+            self.current_animation = self.kick
+            self.animation_is_cycled = False
+            self.animation_index = 0
+            self.isDamaged = False
+            self.current_actions.add(KICK)
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
+
+    def set_duckkick(self, reversed=False):
+        pass
 
     def set_being_hit(self):
         self.current_animation = self.being_hit

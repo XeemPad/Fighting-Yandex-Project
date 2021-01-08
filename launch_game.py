@@ -49,7 +49,8 @@ RESTART_BTN_COLOR = (247, 148, 60)
 RESTART_BTN_SECONDARY_COLOR = (255, 43, 43)
 
 WIN_SOUNDS_DICT = {'scorpion': 'data/sounds/wins/scorpion_wins.mp3',
-                   'liukang': 'data/sounds/wins/liukang_wins.mp3'}
+                   'liukang': 'data/sounds/wins/liukang_wins.mp3',
+                   'draw': 'data/sounds/wins/draw.mp3'}
 
 fightSound = pygame.mixer.Sound('data/sounds/fight.mp3')
 fightSound.set_volume(sounds_volume)
@@ -62,6 +63,7 @@ for sound in scorpionSounds:
 buttons = []
 music_volume = 0.05
 is_paused = False
+game_is_over = False
 
 
 def triggered_keys_processing(event=None, keys_status=None):
@@ -94,11 +96,15 @@ def pause_or_unpause(paused_by_button=True):  # Функция для устан
 
 
 def game_over(winner=None):
+    global game_is_over
+    game_is_over = True
     pause_or_unpause(False)
     if not winner:  # Ничья
         result_text = 'Draw'
+        pygame.mixer.Sound(WIN_SOUNDS_DICT['draw']).play()
     else:
         result_text = PLAYERNAMES[fighters.index(winner)] + '  ' + 'wins!'
+        pygame.mixer.Sound(WIN_SOUNDS_DICT[winner.character]).play()
     # Надпись результатов:
     fight_info_text, text_width, text_height = text_to_surface(result_text, FIGHT_INFO_TEXT_COLOR,
                                                                font_size=FIGHT_INFO_TEXT_SIZE,
@@ -106,8 +112,6 @@ def game_over(winner=None):
                                                                font_directory=FONT_DIRECTORY,
                                                                italic=True)
     fight_info_coords = ((WINDOW_WIDTH - text_width) // 2, (WINDOW_HEIGHT - text_height) // 7 * 2)
-    pygame.mixer.Sound(WIN_SOUNDS_DICT[winner.character]).play()
-
     window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
 
     # Создание кнопки перезапуска игры:
@@ -137,11 +141,6 @@ clock = pygame.time.Clock()
 # Загрузка фона:
 background = pygame.image.load(BACKGROUND_DIRECTORIES[bg])
 location = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
-
-# Музыка:
-music.load(random.choice(MUSIC_DIRECTORIES))
-music.set_volume(music_volume)
-music.play(-1)
 
 # Звук перед началом боя
 arenaSound = pygame.mixer.Sound(random.choice(ARENA_SOUNDS))
@@ -199,6 +198,11 @@ pygame.time.delay(1000)
 
 if fighters[0].character == 'scorpion' or fighters[1].character == 'scorpion':
     scorpionSounds[0].play()
+
+# Музыка:
+music.load(random.choice(MUSIC_DIRECTORIES))
+music.set_volume(music_volume)
+music.play(-1)
 
 pause_or_unpause(False)  # Ставим игру на паузу
 frames_on_pause_count = 0
@@ -295,18 +299,19 @@ while running:
         window.blit(bar.get_surface(), coords)
     # Отрисовка кнопок:
     for btn in buttons:
-        window.blit(btn.get_surface(), pause_btn_coords)
+        window.blit(btn.get_surface(), btn.get_pos())
 
     # Проверка здоровья персонажей и объявление результатов при необходимости:
-    if not fighters[0].get_hp() > 0 < fighters[1].get_hp():
-        if fighters[0].get_hp() <= 0:
-            if fighters[1].get_hp() <= 0:
-                game_over()
+    if not game_is_over:
+        if not fighters[0].get_hp() > 0 < fighters[1].get_hp():
+            if fighters[0].get_hp() <= 0:
+                if fighters[1].get_hp() <= 0:
+                    game_over()
+                else:
+                    game_over(winner=fighters[1])
             else:
-                game_over(winner=fighters[1])
-        else:
-            if fighters[1].get_hp() <= 0:
-                game_over(winner=fighters[0])
+                if fighters[1].get_hp() <= 0:
+                    game_over(winner=fighters[0])
 
     # Перерисовка спрайтов:
     all_sprites.update()

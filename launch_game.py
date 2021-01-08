@@ -1,10 +1,10 @@
 import pygame
+from pygame.mixer import music
 import random
 from object_classes import Fighter, HealthBar, Button, IMAGE_SCALE_VALUE
-from pygame.mixer import music
 
-from main import terminate, start_game, GAME_NAME, ICON_FILE_DIRECTORY, WINDOW_WIDTH, \
-    WINDOW_HEIGHT, CONFIGURATION_FILE_DIRECTORY, FONT_DIRECTORY
+from main import terminate, start_game, sounds_volume, GAME_NAME, ICON_FILE_DIRECTORY, \
+    WINDOW_WIDTH, WINDOW_HEIGHT, CONFIGURATION_FILE_DIRECTORY, FONT_DIRECTORY
 from image_functions import text_to_surface
 
 
@@ -47,6 +47,7 @@ RESTART_BTN_COLOR = (247, 148, 60)
 RESTART_BTN_SECONDARY_COLOR = (255, 43, 43)
 
 fightSound = pygame.mixer.Sound('data/sounds/fight.mp3')
+fightSound.set_volume(sounds_volume)
 
 buttons = []
 music_volume = 0.05

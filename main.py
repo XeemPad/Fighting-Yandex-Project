@@ -24,6 +24,7 @@ TITLE_TEXT_COLOR = (255, 255, 0)
 
 
 music_volume = 0.4
+sounds_volume = 0.1
 
 
 def terminate():

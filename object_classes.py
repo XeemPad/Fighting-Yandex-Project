@@ -264,7 +264,7 @@ class Fighter(pygame.sprite.Sprite):
 
         self.position = position
         self.update_image(self.idle[0])
-        self.rect.topleft = self.position
+        self.rect.bottomleft = self.position
 
         self.floor_y = self.rect.bottom
 
@@ -446,9 +446,9 @@ class Fighter(pygame.sprite.Sprite):
         self.image = new_image
         self.rect = self.image.get_rect()
         if self.image_is_reverted:
-            self.rect.topright = self.position
+            self.rect.bottomright = self.position
         else:
-            self.rect.topleft = self.position
+            self.rect.bottomleft = self.position
         self.mask = pygame.mask.from_surface(self.image)
 
     def revert(self):

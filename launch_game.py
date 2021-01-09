@@ -29,7 +29,7 @@ CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.
 
 fighter_width = 63 * IMAGE_SCALE_VALUE
 FIGHTERS_X = [WINDOW_WIDTH // 10, WINDOW_WIDTH // 10 * 9 - fighter_width]
-FIGHTERS_Y = WINDOW_HEIGHT // 7 * 3
+FIGHTERS_BOTTOM = WINDOW_HEIGHT // 7 * 6
 
 PLAYERNAMES = ('Player 1', 'Player 2')
 
@@ -150,8 +150,8 @@ all_sprites = pygame.sprite.Group()
 
 
 # Создание персонажей:
-fighters = [Fighter(all_sprites, fighter1_char, (FIGHTERS_X[0], FIGHTERS_Y)),
-            Fighter(all_sprites, fighter2_char, (FIGHTERS_X[1], FIGHTERS_Y))]
+fighters = [Fighter(all_sprites, fighter1_char, (FIGHTERS_X[0], FIGHTERS_BOTTOM)),
+            Fighter(all_sprites, fighter2_char, (FIGHTERS_X[1], FIGHTERS_BOTTOM))]
 fighter_at_left = fighters[0]  # Персонаж, стоящий слева
 fighters[1].revert()  # Поворачиваем второго игрока к центру
 

@@ -337,9 +337,9 @@ class Fighter(pygame.sprite.Sprite):
 
         self.x_speed = 18 * (WINDOW_WIDTH // 1024)
         self.y_speed = 36 * (WINDOW_WIDTH // 1024)
-        self.gravity_acceleration = 4 * (WINDOW_WIDTH // 1024) ** 2
         self.current_x_speed = 0
         self.current_y_speed = 0  # Отрицательная скорость означает подъём вверх
+        self.acceleration = 30
         self.character = character
         self.health = 100
         self.image_is_reverted = False
@@ -516,6 +516,8 @@ class Fighter(pygame.sprite.Sprite):
                         self.set_kick(True)
                     elif self.current_animation == self.duckkick:
                         self.set_duckkick(True)
+                    elif self.current_animation == self.jump:
+                        self.set_jump(True)
                     elif DUCK in self.current_actions:  # Это условие должно быть предпоследним
                         self.set_duck(True)
                     else:
@@ -535,10 +537,14 @@ class Fighter(pygame.sprite.Sprite):
                 self.position = self.rect.bottomright
             else:
                 self.position = self.rect.bottomleft
-            self.update_image(new_image)  # Установка новой картинки
 
             if JUMP not in self.current_actions:
-                self.rect.bottom = self.floor_y
+                self.position = self.position[0], self.floor_y
+            else:
+                self.current_y_speed = self.animation_index ** 2
+                if self.current_animation != self.jump:
+                    self.current_y_speed = -self.current_y_speed
+            self.update_image(new_image)  # Установка новой картинки
         if self.current_x_speed:
             if ((0 < (self.rect.x + round(self.current_x_speed / self.animation_delay))
                  < WINDOW_WIDTH - self.rect.width)):
@@ -548,6 +554,9 @@ class Fighter(pygame.sprite.Sprite):
                 self.rect.x = 1
             else:
                 self.rect.right = WINDOW_WIDTH - 2
+        if self.current_y_speed:
+            dy = round((self.current_y_speed * self.acceleration) / self.animation_delay)
+            self.rect.bottom = self.rect.bottom - dy
 
     def update_image(self, new_image):
         self.image = new_image
@@ -708,9 +717,13 @@ class Fighter(pygame.sprite.Sprite):
         self.current_actions.add(NON_SKIPPABLE_ACTION)
         self.current_actions.add(VICTORY)
 
-    def set_jump(self):
-        self.current_animation = self.jump
-        self.animation_is_cycled = False
-        self.animation_index = 0
-        self.current_actions.add(NON_SKIPPABLE_ACTION)
-        self.current_actions.add(JUMP)
+    def set_jump(self, reversed=False):
+        if reversed:
+            self.current_animation = self.jump[len(self.jump) - 1::-1]
+            self.animation_index = 0
+        else:
+            self.current_animation = self.jump
+            self.animation_is_cycled = False
+            self.animation_index = 0
+            self.current_actions.add(NON_SKIPPABLE_ACTION)
+            self.current_actions.add(JUMP)

@@ -22,6 +22,7 @@ MUSIC_DIRECTORIES = ['data/sounds/bg_music/music_one.mp3', 'data/sounds/bg_music
 ARENA_SOUNDS = ['data/sounds/arena1.mp3', 'data/sounds/arena2.mp3']
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
+NON_SKIPPABLE_ACTION, VICTORY = 'non-skip', 'victory_pose'
 CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.K_w,
             HIT: pygame.K_g, KICK: pygame.K_h, BLOCK: pygame.K_j},  # Управление первого игрока
            {LEFT: pygame.K_LEFT, RIGHT: pygame.K_RIGHT, DUCK: pygame.K_DOWN, JUMP: pygame.K_UP,
@@ -88,6 +89,10 @@ def pause_or_unpause(paused_by_button=True):  # Функция для устан
         if paused_by_button:  # Если пауза была вызвана кнопкой
             pause_btn.set_text(text_to_surface('Pause', PAUSE_BTN_TEXT_COLOR, PAUSE_BTN_TEXT_SIZE,
                                                font_directory=FONT_DIRECTORY)[0])
+            # Если игрок шёл в момент нажатия паузы, то нужно его остановить:
+            for fighter in fighters:
+                if fighter.current_actions & {LEFT, RIGHT} and JUMP not in fighter.current_actions:
+                    fighter.set_idle()
     else:
         is_paused = True
         if paused_by_button:  # Если пауза была вызвана кнопкой
@@ -105,6 +110,7 @@ def game_over(winner=None):
     else:
         result_text = PLAYERNAMES[fighters.index(winner)] + '  ' + 'wins!'
         pygame.mixer.Sound(WIN_SOUNDS_DICT[winner.character]).play()
+        winner.set_victory()  # Победная поза
     # Надпись результатов:
     fight_info_text, text_width, text_height = text_to_surface(result_text, FIGHT_INFO_TEXT_COLOR,
                                                                font_size=FIGHT_INFO_TEXT_SIZE,
@@ -223,6 +229,18 @@ while running:
                     # Проверка нажатия на кнопку:
                     if btn.check_mouse_position(event.pos):
                         btn.trigger()
+
+        # Перерисовка окна только если исполняется победная поза или это начало игры:
+        if VICTORY in fighters[0].current_actions | fighters[1].current_actions or \
+                frames_on_pause_count < FPS:
+            window.blit(location, (0, 0))
+            window.blit(fight_info_text, fight_info_coords)  # Наложение текста на поверхность
+            all_sprites.update()
+            all_sprites.draw(window)
+            # Отрисовка полосок со здоровьем
+            for num, bar in enumerate(hp_bars):
+                coords = bars_coords[num]
+                window.blit(bar.get_surface(), coords)
 
         # Отрисовка кнопок:
         for btn in buttons:

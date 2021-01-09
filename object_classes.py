@@ -5,8 +5,191 @@ from image_functions import text_to_surface
 pygame.init()
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
-NON_SKIPPABLE_ACTION = 'non-skip'
+NON_SKIPPABLE_ACTION, VICTORY = 'non-skip', 'victory_pose'
 DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5, KICK: 12, DUCK + KICK: 3}
+
+ANIMATION_DICT = {'scorpion':
+                      {'idle': [pygame.image.load(f'data/sprites/scorpion/idle1.png'),
+                                pygame.image.load(f'data/sprites/scorpion/idle2.png'),
+                                pygame.image.load(f'data/sprites/scorpion/idle3.png'),
+                                pygame.image.load(f'data/sprites/scorpion/idle4.png'),
+                                pygame.image.load(f'data/sprites/scorpion/idle5.png'),
+                                pygame.image.load(f'data/sprites/scorpion/idle6.png'),
+                                pygame.image.load(f'data/sprites/scorpion/idle7.png'),
+                                pygame.image.load(f'data/sprites/scorpion/idle8.png'),
+                                pygame.image.load(f'data/sprites/scorpion/idle9.png')],
+                       'walk': [pygame.image.load(f'data/sprites/scorpion/walk1.png'),
+                                pygame.image.load(f'data/sprites/scorpion/walk2.png'),
+                                pygame.image.load(f'data/sprites/scorpion/walk3.png'),
+                                pygame.image.load(f'data/sprites/scorpion/walk4.png'),
+                                pygame.image.load(f'data/sprites/scorpion/walk5.png'),
+                                pygame.image.load(f'data/sprites/scorpion/walk6.png'),
+                                pygame.image.load(f'data/sprites/scorpion/walk7.png'),
+                                pygame.image.load(f'data/sprites/scorpion/walk8.png'),
+                                pygame.image.load(f'data/sprites/scorpion/walk9.png')],
+                       'duck': [pygame.image.load(f'data/sprites/scorpion/duck1.png'),
+                                pygame.image.load(f'data/sprites/scorpion/duck2.png'),
+                                pygame.image.load(f'data/sprites/scorpion/duck3.png')],
+                       'jump': [pygame.image.load(f'data/sprites/scorpion/jump1.png'),
+                                pygame.image.load(f'data/sprites/scorpion/jump2.png'),
+                                pygame.image.load(f'data/sprites/scorpion/jump3.png')],
+                       'block': [pygame.image.load(f'data/sprites/scorpion/block1.png'),
+                                 pygame.image.load(f'data/sprites/scorpion/block2.png'),
+                                 pygame.image.load(f'data/sprites/scorpion/block3.png')],
+                       'duckblock': [pygame.image.load(f'data/sprites/scorpion/duckblock1.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/duckblock2.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/duckblock3.png')],
+                       'punch': [pygame.image.load(f'data/sprites/scorpion/punch1.png'),
+                                 pygame.image.load(f'data/sprites/scorpion/punch2.png'),
+                                 pygame.image.load(f'data/sprites/scorpion/punch3.png')],
+                       'duckpunch': [pygame.image.load(f'data/sprites/scorpion/duckpunch1.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/duckpunch2.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/duckpunch3.png')],
+                       'jumppunch': [pygame.image.load(f'data/sprites/scorpion/jumppunch1.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/jumppunch2.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/jumppunch3.png')],
+                       'kick': [pygame.image.load(f'data/sprites/scorpion/kick1.png'),
+                                pygame.image.load(f'data/sprites/scorpion/kick2.png'),
+                                pygame.image.load(f'data/sprites/scorpion/kick3.png'),
+                                pygame.image.load(f'data/sprites/scorpion/kick4.png'),
+                                pygame.image.load(f'data/sprites/scorpion/kick5.png'),
+                                pygame.image.load(f'data/sprites/scorpion/kick6.png')],
+                       'duckkick': [pygame.image.load(f'data/sprites/scorpion/duckkick1.png'),
+                                    pygame.image.load(f'data/sprites/scorpion/duckkick2.png'),
+                                    pygame.image.load(f'data/sprites/scorpion/duckkick3.png')],
+                       'jumpkick': [pygame.image.load(f'data/sprites/scorpion/jumpkick1.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/jumpkick2.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/jumpkick3.png')],
+                       # Последняя картинка задерживается на время:
+                       'victory': [pygame.image.load(f'data/sprites/scorpion/victory1.png'),
+                                   pygame.image.load(f'data/sprites/scorpion/victory2.png'),
+                                   pygame.image.load(f'data/sprites/scorpion/victory3.png'),
+                                   pygame.image.load(f'data/sprites/scorpion/victory4.png'),
+                                   pygame.image.load(f'data/sprites/scorpion/victory5.png'),
+                                   pygame.image.load(f'data/sprites/scorpion/victory5.png'),
+                                   pygame.image.load(f'data/sprites/scorpion/victory5.png'),
+                                   pygame.image.load(f'data/sprites/scorpion/victory5.png'),
+                                   pygame.image.load(f'data/sprites/scorpion/victory5.png')],
+                       # Списки будут сразу с реверсами:
+                       'being_hit': [pygame.image.load(f'data/sprites/scorpion/hit1.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/hit2.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/hit3.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/hit2.png'),
+                                     pygame.image.load(f'data/sprites/scorpion/hit1.png')],
+                       'being_hitdown': [pygame.image.load(f'data/sprites/scorpion/hitdown1.png'),
+                                         pygame.image.load(f'data/sprites/scorpion/hitdown2.png'),
+                                         pygame.image.load(f'data/sprites/scorpion/hitdown3.png'),
+                                         pygame.image.load(f'data/sprites/scorpion/hitdown2.png'),
+                                         pygame.image.load(f'data/sprites/scorpion/hitdown1.png')],
+                       'being_duckhit': [pygame.image.load(f'data/sprites/scorpion/duckhit1.png'),
+                                         pygame.image.load(f'data/sprites/scorpion/duckhit2.png'),
+                                         pygame.image.load(f'data/sprites/scorpion/duckhit3.png'),
+                                         pygame.image.load(f'data/sprites/scorpion/duckhit2.png'),
+                                         pygame.image.load(f'data/sprites/scorpion/duckhit1.png')]},
+                  'liukang':
+                      {'idle': [pygame.image.load(f'data/sprites/liukang/idle1.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle2.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle3.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle4.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle5.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle6.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle7.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle8.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle9.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle10.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle11.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle12.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle13.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle14.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle15.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle16.png'),
+                                pygame.image.load(f'data/sprites/liukang/idle17.png')],
+                       'walk': [pygame.image.load(f'data/sprites/liukang/walk1.png'),
+                                pygame.image.load(f'data/sprites/liukang/walk2.png'),
+                                pygame.image.load(f'data/sprites/liukang/walk3.png'),
+                                pygame.image.load(f'data/sprites/liukang/walk4.png'),
+                                pygame.image.load(f'data/sprites/liukang/walk5.png'),
+                                pygame.image.load(f'data/sprites/liukang/walk6.png'),
+                                pygame.image.load(f'data/sprites/liukang/walk7.png'),
+                                pygame.image.load(f'data/sprites/liukang/walk8.png')],
+                       'duck': [pygame.image.load(f'data/sprites/liukang/duck1.png'),
+                                pygame.image.load(f'data/sprites/liukang/duck2.png'),
+                                pygame.image.load(f'data/sprites/liukang/duck3.png')],
+                       'jump': [pygame.image.load(f'data/sprites/liukang/jump1.png'),
+                                pygame.image.load(f'data/sprites/liukang/jump2.png'),
+                                pygame.image.load(f'data/sprites/liukang/jump3.png')],
+                       'block': [pygame.image.load(f'data/sprites/liukang/block1.png'),
+                                 pygame.image.load(f'data/sprites/liukang/block2.png'),
+                                 pygame.image.load(f'data/sprites/liukang/block3.png')],
+                       'duckblock': [pygame.image.load(f'data/sprites/liukang/duckblock1.png'),
+                                     pygame.image.load(f'data/sprites/liukang/duckblock2.png'),
+                                     pygame.image.load(f'data/sprites/liukang/duckblock3.png')],
+                       'punch': [pygame.image.load(f'data/sprites/liukang/punch1.png'),
+                                 pygame.image.load(f'data/sprites/liukang/punch2.png'),
+                                 pygame.image.load(f'data/sprites/liukang/punch3.png')],
+                       'duckpunch': [pygame.image.load(f'data/sprites/liukang/duckpunch1.png'),
+                                     pygame.image.load(f'data/sprites/liukang/duckpunch2.png'),
+                                     pygame.image.load(f'data/sprites/liukang/duckpunch3.png')],
+                       'jumppunch': [pygame.image.load(f'data/sprites/liukang/jumppunch1.png'),
+                                     pygame.image.load(f'data/sprites/liukang/jumppunch2.png'),
+                                     pygame.image.load(f'data/sprites/liukang/jumppunch3.png')],
+                       'kick': [pygame.image.load(f'data/sprites/liukang/kick1.png'),
+                                pygame.image.load(f'data/sprites/liukang/kick2.png'),
+                                pygame.image.load(f'data/sprites/liukang/kick3.png'),
+                                pygame.image.load(f'data/sprites/liukang/kick4.png'),
+                                pygame.image.load(f'data/sprites/liukang/kick5.png'),
+                                pygame.image.load(f'data/sprites/liukang/kick6.png')],
+                       'duckkick': [pygame.image.load(f'data/sprites/liukang/duckkick1.png'),
+                                    pygame.image.load(f'data/sprites/liukang/duckkick2.png'),
+                                    pygame.image.load(f'data/sprites/liukang/duckkick3.png')],
+                       'jumpkick': [pygame.image.load(f'data/sprites/liukang/jumpkick1.png'),
+                                    pygame.image.load(f'data/sprites/liukang/jumpkick2.png'),
+                                    pygame.image.load(f'data/sprites/liukang/jumpkick3.png')],
+                       # Последняя картинка задерживается на время:
+                       'victory': [pygame.image.load(f'data/sprites/liukang/victory1.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory2.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory3.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory4.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory5.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory6.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory7.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory8.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory9.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory10.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory11.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory12.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory13.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory14.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory15.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory15.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory15.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory15.png'),
+                                   pygame.image.load(f'data/sprites/liukang/victory15.png')],
+                       # Списки будут сразу с реверсами:
+                       'being_hit': [pygame.image.load(f'data/sprites/liukang/hit1.png'),
+                                     pygame.image.load(f'data/sprites/liukang/hit2.png'),
+                                     pygame.image.load(f'data/sprites/liukang/hit3.png'),
+                                     pygame.image.load(f'data/sprites/liukang/hit2.png'),
+                                     pygame.image.load(f'data/sprites/liukang/hit1.png')],
+                       'being_hitdown': [pygame.image.load(f'data/sprites/liukang/hitdown1.png'),
+                                         pygame.image.load(f'data/sprites/liukang/hitdown2.png'),
+                                         pygame.image.load(f'data/sprites/liukang/hitdown3.png'),
+                                         pygame.image.load(f'data/sprites/liukang/hitdown2.png'),
+                                         pygame.image.load(f'data/sprites/liukang/hitdown1.png')],
+                       'being_duckhit': [pygame.image.load(f'data/sprites/liukang/duckhit1.png'),
+                                         pygame.image.load(f'data/sprites/liukang/duckhit2.png'),
+                                         pygame.image.load(f'data/sprites/liukang/duckhit3.png'),
+                                         pygame.image.load(f'data/sprites/liukang/duckhit2.png'),
+                                         pygame.image.load(f'data/sprites/liukang/duckhit1.png')]}
+                  }
+
+FIGHT_SOUNDS = {
+    HIT: pygame.mixer.Sound('data/sounds/punches_kicks/punch.mp3'),
+    KICK: pygame.mixer.Sound('data/sounds/punches_kicks/kick.mp3'),
+    BLOCK: pygame.mixer.Sound('data/sounds/punches_kicks/block.mp3'),
+    JUMP: pygame.mixer.Sound('data/sounds/punches_kicks/jump.mp3'),
+    DUCK: pygame.mixer.Sound('data/sounds/punches_kicks/duck.mp3')
+}
 
 STANDARD_BUTTON_COLOR = (242, 72, 34)
 STANDARD_SECONDARY_BUTTON_COLOR = (255, 204, 0)
@@ -17,7 +200,6 @@ for sound in button_sounds:
     sound.set_volume(sounds_volume)
 
 IMAGE_SCALE_VALUE = round((WINDOW_WIDTH / 1024) * 2)
-fighter_width = 63 * IMAGE_SCALE_VALUE
 
 PLAYER_NAME_FONT_DIRECTORY = 'data/font2.ttf'
 PLAYER_NAME_FONT_SIZE = 28
@@ -130,7 +312,8 @@ class HealthBar:
                          (0, 0, round(self.width * (self.hp / 100)), self.height))
 
     def render_text_on_bar(self):
-        self.text_surface, self.text_w, self.text_h = text_to_surface(self.text, (0, 0, 0), PLAYER_NAME_FONT_SIZE,
+        self.text_surface, self.text_w, self.text_h = text_to_surface(self.text, (0, 0, 0),
+                                                                      PLAYER_NAME_FONT_SIZE,
                                                                       font_directory=PLAYER_NAME_FONT_DIRECTORY)
         self.text_x = 10 if self.align_is_left else self.width - 10 - self.text_w
         self.text_y = (self.height - self.text_h) // 2 - 2
@@ -161,106 +344,24 @@ class Fighter(pygame.sprite.Sprite):
         self.health = 100
         self.image_is_reverted = False
 
-        self.fightSounds = {
-            HIT: pygame.mixer.Sound('data/sounds/punches_kicks/punch.mp3'),
-            KICK: pygame.mixer.Sound('data/sounds/punches_kicks/kick.mp3'),
-            BLOCK: pygame.mixer.Sound('data/sounds/punches_kicks/block.mp3'),
-            JUMP: pygame.mixer.Sound('data/sounds/punches_kicks/jump.mp3'),
-            DUCK: pygame.mixer.Sound('data/sounds/punches_kicks/duck.mp3')
-        }
-
         self.animation_delay = FPS / 60 * 5  # Задержка перед следующей картинкой анимации
         self.frames_count = 0
 
-        idle_images = [pygame.image.load(f'data/sprites/{self.character}/idle1.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/idle2.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/idle3.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/idle4.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/idle5.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/idle6.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/idle7.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/idle8.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/idle9.png')]
-        self.idle = self.scaled_animation(idle_images)
-
-        walk_images = [pygame.image.load(f'data/sprites/{self.character}/walk1.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/walk2.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/walk3.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/walk4.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/walk5.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/walk6.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/walk7.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/walk8.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/walk9.png')]
-        self.walk = self.scaled_animation(walk_images)
-
-        duck_images = [pygame.image.load(f'data/sprites/{self.character}/duck1.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/duck2.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/duck3.png')]
-        self.duck = self.scaled_animation(duck_images)
-
-        jump_images = [pygame.image.load(f'data/sprites/{self.character}/jump1.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/jump2.png'),
-                       pygame.image.load(f'data/sprites/{self.character}/jump3.png')]
-        self.jump = self.scaled_animation(jump_images)
-
-        block_images = [pygame.image.load(f'data/sprites/{self.character}/block1.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/block2.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/block3.png')]
-        self.block = self.scaled_animation(block_images)
-
-        duckblock_images = [pygame.image.load(f'data/sprites/{self.character}/duckblock1.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/duckblock2.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/duckblock3.png')]
-        self.duckblock = self.scaled_animation(duckblock_images)
-
-        punch_images = [pygame.image.load(f'data/sprites/{self.character}/punch1.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/punch2.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/punch3.png')]
-        self.punch = self.scaled_animation(punch_images)
-
-        duckpunch_images = [pygame.image.load(f'data/sprites/{self.character}/duckpunch1.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/duckpunch2.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/duckpunch3.png')]
-        self.duckpunch = self.scaled_animation(duckpunch_images)
-
-        kick_images = [pygame.image.load(f'data/sprites/{self.character}/kick1.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/kick2.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/kick3.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/kick4.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/kick5.png'),
-                        pygame.image.load(f'data/sprites/{self.character}/kick6.png')]
-        self.kick = self.scaled_animation(kick_images)
-
-        duckkick_images = [pygame.image.load(f'data/sprites/{self.character}/duckkick1.png'),
-                           pygame.image.load(f'data/sprites/{self.character}/duckkick2.png'),
-                           pygame.image.load(f'data/sprites/{self.character}/duckkick3.png')]
-        self.duckkick = self.scaled_animation(duckkick_images)
-
-        # Списки будут сразу с реверсами:
-        being_hit_images = [pygame.image.load(f'data/sprites/{self.character}/hit1.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/hit2.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/hit3.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/hit2.png'),
-                            pygame.image.load(f'data/sprites/{self.character}/hit1.png')]
-
-        self.being_hit = self.scaled_animation(being_hit_images)
-
-        being_hitdown_images = [pygame.image.load(f'data/sprites/{self.character}/hitdown1.png'),
-                                pygame.image.load(f'data/sprites/{self.character}/hitdown2.png'),
-                                pygame.image.load(f'data/sprites/{self.character}/hitdown3.png'),
-                                pygame.image.load(f'data/sprites/{self.character}/hitdown2.png'),
-                                pygame.image.load(f'data/sprites/{self.character}/hitdown1.png')]
-
-        self.being_hitdown = self.scaled_animation(being_hitdown_images)
-
-        being_duckhit_images = [pygame.image.load(f'data/sprites/{self.character}/duckhit1.png'),
-                                pygame.image.load(f'data/sprites/{self.character}/duckhit2.png'),
-                                pygame.image.load(f'data/sprites/{self.character}/duckhit3.png'),
-                                pygame.image.load(f'data/sprites/{self.character}/duckhit2.png'),
-                                pygame.image.load(f'data/sprites/{self.character}/duckhit1.png')]
-
-        self.being_duckhit = self.scaled_animation(being_duckhit_images)
+        # Списки анимаций:
+        self.idle = self.scaled_animation(ANIMATION_DICT[self.character]['idle'])
+        self.walk = self.scaled_animation(ANIMATION_DICT[self.character]['walk'])
+        self.duck = self.scaled_animation(ANIMATION_DICT[self.character]['duck'])
+        self.jump = self.scaled_animation(ANIMATION_DICT[self.character]['jump'])
+        self.block = self.scaled_animation(ANIMATION_DICT[self.character]['block'])
+        self.duckblock = self.scaled_animation(ANIMATION_DICT[self.character]['duckblock'])
+        self.punch = self.scaled_animation(ANIMATION_DICT[self.character]['punch'])
+        self.duckpunch = self.scaled_animation(ANIMATION_DICT[self.character]['duckpunch'])
+        self.kick = self.scaled_animation(ANIMATION_DICT[self.character]['kick'])
+        self.duckkick = self.scaled_animation(ANIMATION_DICT[self.character]['duckkick'])
+        self.victory = self.scaled_animation(ANIMATION_DICT[self.character]['victory'])
+        self.being_hit = self.scaled_animation(ANIMATION_DICT[self.character]['being_hit'])
+        self.being_hitdown = self.scaled_animation(ANIMATION_DICT[self.character]['being_hitdown'])
+        self.being_duckhit = self.scaled_animation(ANIMATION_DICT[self.character]['being_duckhit'])
 
         self.position = position
         self.update_image(self.idle[0])
@@ -293,10 +394,10 @@ class Fighter(pygame.sprite.Sprite):
         if HIT in enemy_actions:
             enemy_hit_configuration += HIT
             # Звук удара:
-            self.fightSounds[HIT].play()
+            FIGHT_SOUNDS[HIT].play()
         if KICK in enemy_actions:
             enemy_hit_configuration += KICK
-            self.fightSounds[KICK].play()
+            FIGHT_SOUNDS[KICK].play()
         damage_value = DAMAGES_DICT[enemy_hit_configuration]
         # Если у данного игрока блок, то урон вдвое меньше, кроме подсечки:
         if BLOCK in self.current_actions and enemy_hit_configuration != DUCK + KICK:
@@ -439,8 +540,13 @@ class Fighter(pygame.sprite.Sprite):
                 self.rect.bottom = self.floor_y
         if self.current_x_speed:
             if ((0 < (self.rect.x + round(self.current_x_speed / self.animation_delay))
-                 < WINDOW_WIDTH - fighter_width)):
+                 < WINDOW_WIDTH - self.rect.width)):
                 self.rect.x += round(self.current_x_speed / self.animation_delay)
+        elif self.rect.x <= 0 or self.rect.x >= WINDOW_WIDTH - self.rect.width:
+            if self.rect.x <= 0:
+                self.rect.x = 1
+            else:
+                self.rect.right = WINDOW_WIDTH - 2
 
     def update_image(self, new_image):
         self.image = new_image
@@ -592,3 +698,11 @@ class Fighter(pygame.sprite.Sprite):
         self.animation_is_cycled = False
         self.animation_index = 0
         self.current_actions.add(NON_SKIPPABLE_ACTION)
+
+    def set_victory(self):
+        self.set_idle()
+        self.current_animation = self.victory
+        self.animation_is_cycled = False
+        self.animation_index = 0
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
+        self.current_actions.add(VICTORY)

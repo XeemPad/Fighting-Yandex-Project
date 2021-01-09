@@ -426,6 +426,8 @@ class Fighter(pygame.sprite.Sprite):
                 self.set_punch()
             elif action_name == KICK:
                 self.set_kick()
+            elif action_name == JUMP:
+                self.set_jump()
         elif self.current_actions < {LEFT, RIGHT, DUCK}:
             if self.current_actions < {LEFT, RIGHT}:
                 if action_name == BLOCK:
@@ -706,3 +708,10 @@ class Fighter(pygame.sprite.Sprite):
         self.animation_index = 0
         self.current_actions.add(NON_SKIPPABLE_ACTION)
         self.current_actions.add(VICTORY)
+
+    def set_jump(self):
+        self.current_animation = self.jump
+        self.animation_is_cycled = False
+        self.animation_index = 0
+        self.current_actions.add(NON_SKIPPABLE_ACTION)
+        self.current_actions.add(JUMP)

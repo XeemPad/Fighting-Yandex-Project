@@ -60,15 +60,10 @@ ANIMATION_DICT = {'scorpion':
                        'jumpkick': [pygame.image.load(f'data/sprites/scorpion/jumpkick1.png'),
                                      pygame.image.load(f'data/sprites/scorpion/jumpkick2.png'),
                                      pygame.image.load(f'data/sprites/scorpion/jumpkick3.png')],
-                       # Последняя картинка задерживается на время:
                        'victory': [pygame.image.load(f'data/sprites/scorpion/victory1.png'),
                                    pygame.image.load(f'data/sprites/scorpion/victory2.png'),
                                    pygame.image.load(f'data/sprites/scorpion/victory3.png'),
                                    pygame.image.load(f'data/sprites/scorpion/victory4.png'),
-                                   pygame.image.load(f'data/sprites/scorpion/victory5.png'),
-                                   pygame.image.load(f'data/sprites/scorpion/victory5.png'),
-                                   pygame.image.load(f'data/sprites/scorpion/victory5.png'),
-                                   pygame.image.load(f'data/sprites/scorpion/victory5.png'),
                                    pygame.image.load(f'data/sprites/scorpion/victory5.png')],
                        # Списки будут сразу с реверсами:
                        'being_hit': [pygame.image.load(f'data/sprites/scorpion/hit1.png'),
@@ -145,7 +140,6 @@ ANIMATION_DICT = {'scorpion':
                        'jumpkick': [pygame.image.load(f'data/sprites/liukang/jumpkick1.png'),
                                     pygame.image.load(f'data/sprites/liukang/jumpkick2.png'),
                                     pygame.image.load(f'data/sprites/liukang/jumpkick3.png')],
-                       # Последняя картинка задерживается на время:
                        'victory': [pygame.image.load(f'data/sprites/liukang/victory1.png'),
                                    pygame.image.load(f'data/sprites/liukang/victory2.png'),
                                    pygame.image.load(f'data/sprites/liukang/victory3.png'),
@@ -160,10 +154,6 @@ ANIMATION_DICT = {'scorpion':
                                    pygame.image.load(f'data/sprites/liukang/victory12.png'),
                                    pygame.image.load(f'data/sprites/liukang/victory13.png'),
                                    pygame.image.load(f'data/sprites/liukang/victory14.png'),
-                                   pygame.image.load(f'data/sprites/liukang/victory15.png'),
-                                   pygame.image.load(f'data/sprites/liukang/victory15.png'),
-                                   pygame.image.load(f'data/sprites/liukang/victory15.png'),
-                                   pygame.image.load(f'data/sprites/liukang/victory15.png'),
                                    pygame.image.load(f'data/sprites/liukang/victory15.png')],
                        # Списки будут сразу с реверсами:
                        'being_hit': [pygame.image.load(f'data/sprites/liukang/hit1.png'),

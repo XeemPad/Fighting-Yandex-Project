@@ -365,7 +365,6 @@ class Fighter(pygame.sprite.Sprite):
 
         self.position = position
         self.update_image(self.idle[0])
-        self.rect.bottomleft = self.position
 
         self.floor_y = self.rect.bottom
 
@@ -533,9 +532,9 @@ class Fighter(pygame.sprite.Sprite):
             # Разворачиваем картинку, если персонаж должен быть повёрнут, обновляем координаты:
             if self.image_is_reverted:
                 new_image = pygame.transform.flip(new_image, True, False)
-                self.position = self.rect.topright
+                self.position = self.rect.bottomright
             else:
-                self.position = self.rect.topleft
+                self.position = self.rect.bottomleft
             self.update_image(new_image)  # Установка новой картинки
 
             if JUMP not in self.current_actions:

@@ -22,7 +22,7 @@ MUSIC_DIRECTORIES = ['data/sounds/bg_music/music_one.mp3', 'data/sounds/bg_music
 ARENA_SOUNDS = ['data/sounds/arena1.mp3', 'data/sounds/arena2.mp3']
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
-NON_SKIPPABLE_ACTION, VICTORY = 'non-skip', 'victory_pose'
+NON_SKIPPABLE_ACTION, VICTORY, BEING_HIT = 'non-skip', 'victory_pose', 'being_hit'
 CONTROL = [{LEFT: pygame.K_a, RIGHT: pygame.K_d, DUCK: pygame.K_s, JUMP: pygame.K_w,
             HIT: pygame.K_g, KICK: pygame.K_h, BLOCK: pygame.K_j},  # Управление первого игрока
            {LEFT: pygame.K_LEFT, RIGHT: pygame.K_RIGHT, DUCK: pygame.K_DOWN, JUMP: pygame.K_UP,

@@ -32,6 +32,7 @@ ANIMATION_DICT = {'scorpion':
                                 pygame.image.load(f'data/sprites/scorpion/duck3.png')],
                        'jump': [pygame.image.load(f'data/sprites/scorpion/jump1.png'),
                                 pygame.image.load(f'data/sprites/scorpion/jump2.png'),
+                                pygame.image.load(f'data/sprites/scorpion/jump3.png'),
                                 pygame.image.load(f'data/sprites/scorpion/jump3.png')],
                        'block': [pygame.image.load(f'data/sprites/scorpion/block1.png'),
                                  pygame.image.load(f'data/sprites/scorpion/block2.png'),
@@ -117,6 +118,7 @@ ANIMATION_DICT = {'scorpion':
                                 pygame.image.load(f'data/sprites/liukang/duck3.png')],
                        'jump': [pygame.image.load(f'data/sprites/liukang/jump1.png'),
                                 pygame.image.load(f'data/sprites/liukang/jump2.png'),
+                                pygame.image.load(f'data/sprites/liukang/jump3.png'),
                                 pygame.image.load(f'data/sprites/liukang/jump3.png')],
                        'block': [pygame.image.load(f'data/sprites/liukang/block1.png'),
                                  pygame.image.load(f'data/sprites/liukang/block2.png'),
@@ -336,15 +338,15 @@ class Fighter(pygame.sprite.Sprite):
         super().__init__(all_sprites)
 
         self.x_speed = 18 * (WINDOW_WIDTH // 1024)
-        self.y_speed = 36 * (WINDOW_WIDTH // 1024)
+        self.y_speed = 90 * (WINDOW_WIDTH // 1024)
         self.current_x_speed = 0
         self.current_y_speed = 0  # Отрицательная скорость означает подъём вверх
-        self.acceleration = 30
+        self.acceleration = 6
         self.character = character
         self.health = 100
         self.image_is_reverted = False
 
-        self.animation_delay = FPS / 60 * 5  # Задержка перед следующей картинкой анимации
+        self.animation_delay = FPS / 60 * 6  # Задержка перед следующей картинкой анимации
         self.frames_count = 0
 
         # Списки анимаций:
@@ -541,9 +543,10 @@ class Fighter(pygame.sprite.Sprite):
             if JUMP not in self.current_actions:
                 self.position = self.position[0], self.floor_y
             else:
-                self.current_y_speed = self.animation_index ** 2
-                if self.current_animation != self.jump:
-                    self.current_y_speed = -self.current_y_speed
+                # Изменение вертикальной скорости:
+                if self.time_in_air > 0:
+                    self.current_y_speed = self.y_speed - self.time_in_air ** 2 * self.acceleration
+                self.time_in_air += 1
             self.update_image(new_image)  # Установка новой картинки
         if self.current_x_speed:
             if ((0 < (self.rect.x + round(self.current_x_speed / self.animation_delay))
@@ -555,7 +558,7 @@ class Fighter(pygame.sprite.Sprite):
             else:
                 self.rect.right = WINDOW_WIDTH - 2
         if self.current_y_speed:
-            dy = round((self.current_y_speed * self.acceleration) / self.animation_delay)
+            dy = round(self.current_y_speed / self.animation_delay)
             self.rect.bottom = self.rect.bottom - dy
 
     def update_image(self, new_image):
@@ -719,9 +722,10 @@ class Fighter(pygame.sprite.Sprite):
 
     def set_jump(self, reversed=False):
         if reversed:
-            self.current_animation = self.jump[len(self.jump) - 1::-1]
+            self.current_animation = self.jump[::-1]
             self.animation_index = 0
         else:
+            self.time_in_air = 0
             self.current_animation = self.jump
             self.animation_is_cycled = False
             self.animation_index = 0

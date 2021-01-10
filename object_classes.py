@@ -460,17 +460,16 @@ class Fighter(pygame.sprite.Sprite):
                     elif action_name == KICK:
                         self.set_duckkick()
         elif JUMP in self.current_actions:
-            if action_name not in self.current_actions:
-                if action_name == LEFT or action_name == RIGHT:
-                    self.set_walk(action_name, is_jumping=True)
-                elif action_name == BLOCK:
-                    pass
-                elif action_name == HIT:
-                    self.set_jumppunch()
-                elif action_name == KICK:
-                    self.set_jumpkick()
-                elif action_name == JUMP:
-                    pass
+            if action_name == LEFT or action_name == RIGHT:
+                self.set_walk(action_name, is_jumping=True)
+            elif action_name == BLOCK:
+                pass
+            elif action_name == HIT and HIT not in self.current_actions:
+                self.set_jumppunch()
+            elif action_name == KICK and KICK not in self.current_actions:
+                self.set_jumpkick()
+            elif action_name == JUMP:
+                pass
         # elif self.current_actions < {LEFT, RIGHT, JUMP}:
         #     if self.current_actions < {LEFT, RIGHT}:
         #         if action_name == BLOCK:
@@ -785,7 +784,6 @@ class Fighter(pygame.sprite.Sprite):
         self.isDamaged = False
         self.current_actions.add(KICK)
         self.current_actions.add(NON_SKIPPABLE_ACTION)
-        print(self.current_actions)
 
     def set_jumppunch(self):
         self.current_animation = self.jumppunch

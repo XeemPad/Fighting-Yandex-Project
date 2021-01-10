@@ -464,12 +464,13 @@ class Fighter(pygame.sprite.Sprite):
                 self.set_walk(action_name, is_jumping=True)
             elif action_name == BLOCK:
                 pass
-            elif action_name == HIT and HIT not in self.current_actions:
-                self.set_jumppunch()
-            elif action_name == KICK and KICK not in self.current_actions:
-                self.set_jumpkick()
-            elif action_name == JUMP:
-                pass
+            if not {HIT, KICK} & self.current_actions:
+                # Нельзя начать удар, находясь невысоко над полом:
+                if (self.floor_y - self.rect.bottom) > self.height // 10:
+                    if action_name == HIT:
+                        self.set_jumppunch()
+                    elif action_name == KICK:
+                        self.set_jumpkick()
         # elif self.current_actions < {LEFT, RIGHT, JUMP}:
         #     if self.current_actions < {LEFT, RIGHT}:
         #         if action_name == BLOCK:
@@ -554,7 +555,7 @@ class Fighter(pygame.sprite.Sprite):
                     elif DUCK in self.current_actions:  # Это условие должно быть предпоследним
                         self.set_duck(True)
                     elif JUMP in self.current_actions:
-                        if self.rect.bottom - self.current_y_speed >= self.floor_y:
+                        if self.rect.bottom > self.floor_y:
                             self.set_idle()
                     else:
                         self.set_idle()
@@ -595,7 +596,7 @@ class Fighter(pygame.sprite.Sprite):
         if self.current_y_speed:
             dy = round(self.current_y_speed / self.animation_delay)
             self.rect.top = self.rect.top - dy
-            if self.rect.top + self.height >= self.floor_y:  # Если персонаж достиг пола:
+            if self.rect.bottom > self.floor_y:  # Если персонаж достиг пола:
                 if BEING_HIT in self.current_actions:
                     self.current_x_speed = 0
                     self.current_y_speed = 0

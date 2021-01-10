@@ -337,7 +337,7 @@ class Fighter(pygame.sprite.Sprite):
     def __init__(self, all_sprites, character, position):
         super().__init__(all_sprites)
 
-        self.x_speed = 18 * (WINDOW_WIDTH // 1024)
+        self.x_speed = 20 * (WINDOW_WIDTH // 1024)
         self.y_speed = 90 * (WINDOW_WIDTH // 1024)
         self.current_x_speed = 0
         self.current_y_speed = 0  # Отрицательная скорость означает подъём вверх
@@ -408,6 +408,8 @@ class Fighter(pygame.sprite.Sprite):
         if BLOCK not in self.current_actions:
             if DUCK in self.current_actions:
                 self.set_being_duckhit()
+            elif JUMP in self.current_actions:
+                self.set_being_hitdown()
             else:
                 if DUCK in enemy_actions:
                     self.set_being_hitdown()
@@ -439,6 +441,12 @@ class Fighter(pygame.sprite.Sprite):
                 elif action_name == KICK:
                     self.set_idle()
                     self.set_kick()
+                elif action_name == JUMP:
+                    self.set_jump()
+                    if LEFT in self.current_actions:
+                        self.set_walk(LEFT, is_jumping=True)
+                    else:
+                        self.set_walk(RIGHT, is_jumping=True)
             elif self.current_actions == {DUCK}:
                 # Игрок может делать другие действия только, если полностью сел:
                 if self.animation_index == len(self.current_animation) - 1:
@@ -560,6 +568,11 @@ class Fighter(pygame.sprite.Sprite):
         if self.current_y_speed:
             dy = round(self.current_y_speed / self.animation_delay)
             self.rect.bottom = self.rect.bottom - dy
+            if self.current_animation == self.being_hitdown:  # Если ударили в воздухе
+                if self.rect.bottom >= self.floor_y:  # Если персонаж достиг пола:
+                    self.current_x_speed = 0
+                    self.current_y_speed = 0
+                    self.current_actions = {NON_SKIPPABLE_ACTION}
 
     def update_image(self, new_image):
         self.image = new_image

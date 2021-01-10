@@ -5,8 +5,8 @@ from image_functions import text_to_surface
 pygame.init()
 
 LEFT, RIGHT, DUCK, JUMP, HIT, KICK, BLOCK = 'left', 'right', 'duck', 'jump', 'hit', 'kick', 'block'
-NON_SKIPPABLE_ACTION, VICTORY = 'non-skip', 'victory_pose'
-DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5, KICK: 12, DUCK + KICK: 3}
+NON_SKIPPABLE_ACTION, VICTORY, BEING_HIT = 'non-skip', 'victory_pose', 'being_hit'
+DAMAGES_DICT = {HIT: 7, DUCK + HIT: 5, KICK: 12, DUCK + KICK: 3, JUMP + HIT: 7, JUMP + KICK: 9}
 
 ANIMATION_DICT = {'scorpion':
                       {'idle': [pygame.image.load(f'data/sprites/scorpion/idle1.png'),
@@ -337,8 +337,8 @@ class Fighter(pygame.sprite.Sprite):
     def __init__(self, all_sprites, character, position):
         super().__init__(all_sprites)
 
-        self.x_speed = 20 * (WINDOW_WIDTH // 1024)
-        self.y_speed = 90 * (WINDOW_WIDTH // 1024)
+        self.x_speed = 22 * (WINDOW_WIDTH // 1024)
+        self.y_speed = 93 * (WINDOW_WIDTH // 1024)
         self.current_x_speed = 0
         self.current_y_speed = 0  # Отрицательная скорость означает подъём вверх
         self.acceleration = 6
@@ -369,6 +369,7 @@ class Fighter(pygame.sprite.Sprite):
 
         self.position = position
         self.update_image(self.idle[0])
+        self.height = self.rect.height
 
         self.floor_y = self.rect.bottom
 
@@ -427,9 +428,9 @@ class Fighter(pygame.sprite.Sprite):
                 self.set_duck()
             elif action_name == BLOCK:
                 self.set_block()
-            elif action_name == HIT:
+            elif action_name == HIT and HIT not in self.current_actions:
                 self.set_punch()
-            elif action_name == KICK:
+            elif action_name == KICK and KICK not in self.current_actions:
                 self.set_kick()
             elif action_name == JUMP:
                 self.set_jump()
@@ -459,16 +460,17 @@ class Fighter(pygame.sprite.Sprite):
                     elif action_name == KICK:
                         self.set_duckkick()
         elif JUMP in self.current_actions:
-            if action_name == LEFT or action_name == RIGHT:
-                self.set_walk(action_name, is_jumping=True)
-            elif action_name == BLOCK:
-                pass
-            elif action_name == HIT:
-                self.set_jumppunch()
-            elif action_name == KICK:
-                self.set_jumpkick()
-            elif action_name == JUMP:
-                pass
+            if action_name not in self.current_actions:
+                if action_name == LEFT or action_name == RIGHT:
+                    self.set_walk(action_name, is_jumping=True)
+                elif action_name == BLOCK:
+                    pass
+                elif action_name == HIT:
+                    self.set_jumppunch()
+                elif action_name == KICK:
+                    self.set_jumpkick()
+                elif action_name == JUMP:
+                    pass
         # elif self.current_actions < {LEFT, RIGHT, JUMP}:
         #     if self.current_actions < {LEFT, RIGHT}:
         #         if action_name == BLOCK:
@@ -489,7 +491,9 @@ class Fighter(pygame.sprite.Sprite):
                 self.current_actions.remove(DUCK)
             elif key == BLOCK and BLOCK in self.current_actions:
                 self.current_actions.add(NON_SKIPPABLE_ACTION)
-            if self.animation_index > 0:
+            if {HIT, KICK} & self.current_actions:
+                pass  # Удары нельзя останавливать
+            elif self.animation_index > 0:
                 self.current_animation = self.current_animation[self.animation_index - 1::-1]
                 if key == DUCK and BLOCK in self.current_actions:
                     self.current_animation.extend(self.duck[::-1] + [self.idle[0]])
@@ -548,22 +552,22 @@ class Fighter(pygame.sprite.Sprite):
                         self.set_duckkick(True)
                     elif self.current_animation == self.jump:
                         self.set_jump(True)
-                    elif self.current_animation == self.jumppunch:
-                        self.set_jumppunch(True)
-                    elif self.current_animation == self.jumpkick:
-                        self.set_jumpkick(True)
                     elif DUCK in self.current_actions:  # Это условие должно быть предпоследним
                         self.set_duck(True)
+                    elif JUMP in self.current_actions:
+                        if self.rect.bottom - self.current_y_speed >= self.floor_y:
+                            self.set_idle()
                     else:
                         self.set_idle()
             else:
                 self.animation_index = (self.animation_index + 1) % len(self.current_animation)
-                if self.current_animation not in (self.punch, self.duckpunch) \
-                        and HIT in self.current_actions:
-                    self.current_actions.remove(HIT)
-                if self.current_animation not in (self.kick, self.duckkick) \
-                        and KICK in self.current_actions:
-                    self.current_actions.remove(KICK)
+                if JUMP not in self.current_actions:
+                    if self.current_animation not in (self.punch, self.duckpunch) \
+                            and HIT in self.current_actions:
+                        self.current_actions.remove(HIT)
+                    if self.current_animation not in (self.kick, self.duckkick) \
+                            and KICK in self.current_actions:
+                        self.current_actions.remove(KICK)
 
             # Разворачиваем картинку, если персонаж должен быть повёрнут, обновляем координаты:
             if self.image_is_reverted:
@@ -591,12 +595,14 @@ class Fighter(pygame.sprite.Sprite):
                 self.rect.right = WINDOW_WIDTH - 2
         if self.current_y_speed:
             dy = round(self.current_y_speed / self.animation_delay)
-            self.rect.bottom = self.rect.bottom - dy
-            if self.current_animation == self.being_hitdown:  # Если ударили в воздухе
-                if self.rect.bottom >= self.floor_y:  # Если персонаж достиг пола:
+            self.rect.top = self.rect.top - dy
+            if self.rect.top + self.height >= self.floor_y:  # Если персонаж достиг пола:
+                if BEING_HIT in self.current_actions:
                     self.current_x_speed = 0
                     self.current_y_speed = 0
                     self.current_actions = {NON_SKIPPABLE_ACTION}
+                else:
+                    self.set_idle()
 
     def update_image(self, new_image):
         self.image = new_image
@@ -736,18 +742,21 @@ class Fighter(pygame.sprite.Sprite):
         self.animation_is_cycled = False
         self.animation_index = 0
         self.current_actions.add(NON_SKIPPABLE_ACTION)
+        self.current_actions.add(BEING_HIT)
 
     def set_being_hitdown(self):
         self.current_animation = self.being_hitdown
         self.animation_is_cycled = False
         self.animation_index = 0
         self.current_actions.add(NON_SKIPPABLE_ACTION)
+        self.current_actions.add(BEING_HIT)
 
     def set_being_duckhit(self):
         self.current_animation = self.being_duckhit
         self.animation_is_cycled = False
         self.animation_index = 0
         self.current_actions.add(NON_SKIPPABLE_ACTION)
+        self.current_actions.add(BEING_HIT)
 
     def set_victory(self):
         self.set_idle()
@@ -769,28 +778,19 @@ class Fighter(pygame.sprite.Sprite):
             self.current_actions.add(NON_SKIPPABLE_ACTION)
             self.current_actions.add(JUMP)
 
-    def set_jumpkick(self, reversed=False):
-        if reversed:
-            self.current_animation = self.jumpkick[len(self.jumpkick) - 2::-1]
-            self.animation_index = 0
-        else:
-            self.current_animation = self.jumpkick
-            self.animation_is_cycled = False
-            self.animation_index = 0
-            self.isDamaged = False
-            self.current_actions.add(KICK)
+    def set_jumpkick(self):
+        self.current_animation = self.jumpkick
+        self.animation_is_cycled = False
+        self.animation_index = 0
+        self.isDamaged = False
+        self.current_actions.add(KICK)
         self.current_actions.add(NON_SKIPPABLE_ACTION)
+        print(self.current_actions)
 
-    def set_jumppunch(self, reversed=False):
-        if reversed:
-            self.current_animation = self.jumppunch[len(self.jumppunch) - 2::-1]
-            self.animation_index = 0
-        else:
-            self.current_animation = self.jumppunch
-            self.animation_is_cycled = False
-            self.animation_index = 0
-            self.isDamaged = False
-            self.current_actions.add(KICK)
+    def set_jumppunch(self):
+        self.current_animation = self.jumppunch
+        self.animation_is_cycled = False
+        self.animation_index = 0
+        self.isDamaged = False
+        self.current_actions.add(HIT)
         self.current_actions.add(NON_SKIPPABLE_ACTION)
-
-

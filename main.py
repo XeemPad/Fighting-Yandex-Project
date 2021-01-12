@@ -3,6 +3,7 @@
 import pygame
 import random
 from subprocess import call
+import sys
 
 # Константы:
 GAME_NAME = 'Kind of Fighting'
@@ -29,7 +30,7 @@ sounds_volume = 0.5
 
 def terminate():
     pygame.quit()
-    exit()
+    sys.exit()
 
 
 def start_game():

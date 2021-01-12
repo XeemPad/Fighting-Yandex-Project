@@ -2,7 +2,6 @@
 
 import pygame
 import random
-from subprocess import call
 import sys
 
 # Константы:
@@ -42,8 +41,7 @@ def start_game():
         for line in [first_fighter, second_fighter, background]:
             cfg.write(line + '\n')
     # Запуск скрипта с игровым процессом:
-    pygame.quit()
-    call('python launch_game.py')
+    import launch_game
     terminate()
 
 

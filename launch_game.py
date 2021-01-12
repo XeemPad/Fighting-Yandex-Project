@@ -290,7 +290,33 @@ while running:
     if pygame.sprite.collide_mask(fighters[0], fighters[1]):
         if fighters[0].check_damage_ability() is True:
             if fighters[1].check_damage_ability() is True:
-                if fighters[0].animation_index > fighters[1].animation_index:
+                if DUCK in fighters[0].get_current_actions():
+                    if DUCK in fighters[1].get_current_actions():
+                        pass
+                    else:
+                        '''Если второй боец стоит, то сидячий имеет преимущество (чтобы не было 
+                        моментов, когда по сидячему даже не ударили, но урон по нему прошёл)'''
+                        if JUMP not in fighters[1].get_current_actions():
+                            fighters[0].isDamaged = True
+                            fighters[1].get_damage(fighters[0].get_current_actions())
+                        else:
+                            '''Однако если первый боец делает подсечку, то физически не может 
+                            попасть по игроку в прыжке'''
+                            if KICK in fighters[0].get_current_actions():
+                                fighters[1].isDamaged = True
+                                fighters[0].get_damage(fighters[1].get_current_actions())
+                elif DUCK in fighters[1].get_current_actions():
+                    if DUCK in fighters[0].get_current_actions():
+                        pass
+                    else:
+                        if JUMP not in fighters[0].get_current_actions():
+                            fighters[1].isDamaged = True
+                            fighters[0].get_damage(fighters[1].get_current_actions())
+                        else:
+                            if KICK in fighters[1].get_current_actions():
+                                fighters[0].isDamaged = True
+                                fighters[1].get_damage(fighters[0].get_current_actions())
+                elif fighters[0].animation_index > fighters[1].animation_index:
                     fighters[0].isDamaged = True
                     fighters[1].get_damage(fighters[0].get_current_actions())
                 elif fighters[0].animation_index < fighters[1].animation_index:

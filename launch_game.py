@@ -1,6 +1,7 @@
 import pygame
 from pygame.mixer import music
 import random
+import os
 from object_classes import Fighter, HealthBar, Button, IMAGE_SCALE_VALUE
 
 from main import terminate, start_game, sounds_volume, GAME_NAME, ICON_FILE_DIRECTORY, \
@@ -101,7 +102,7 @@ def pause_or_unpause(paused_by_button=True):  # Функция для устан
 
 
 def game_over(winner=None):
-    global game_is_over
+    global game_is_over, fight_info_text, fight_info_coords
     game_is_over = True
     pause_or_unpause(False)
     if not winner:  # Ничья
@@ -134,7 +135,8 @@ def game_over(winner=None):
 # Считываем информацию из конфига:
 with open(CONFIGURATION_FILE_DIRECTORY) as cfg:
     fighter1_char, fighter2_char, bg = (line for line in cfg.read().split('\n') if line.strip())
-
+# Удаляем его:
+os.remove(CONFIGURATION_FILE_DIRECTORY)
 
 # Инициализация:
 pygame.init()
@@ -290,33 +292,7 @@ while running:
     if pygame.sprite.collide_mask(fighters[0], fighters[1]):
         if fighters[0].check_damage_ability() is True:
             if fighters[1].check_damage_ability() is True:
-                if DUCK in fighters[0].get_current_actions():
-                    if DUCK in fighters[1].get_current_actions():
-                        pass
-                    else:
-                        '''Если второй боец стоит, то сидячий имеет преимущество (чтобы не было 
-                        моментов, когда по сидячему даже не ударили, но урон по нему прошёл)'''
-                        if JUMP not in fighters[1].get_current_actions():
-                            fighters[0].isDamaged = True
-                            fighters[1].get_damage(fighters[0].get_current_actions())
-                        else:
-                            '''Однако если первый боец делает подсечку, то физически не может 
-                            попасть по игроку в прыжке'''
-                            if KICK in fighters[0].get_current_actions():
-                                fighters[1].isDamaged = True
-                                fighters[0].get_damage(fighters[1].get_current_actions())
-                elif DUCK in fighters[1].get_current_actions():
-                    if DUCK in fighters[0].get_current_actions():
-                        pass
-                    else:
-                        if JUMP not in fighters[0].get_current_actions():
-                            fighters[1].isDamaged = True
-                            fighters[0].get_damage(fighters[1].get_current_actions())
-                        else:
-                            if KICK in fighters[1].get_current_actions():
-                                fighters[0].isDamaged = True
-                                fighters[1].get_damage(fighters[0].get_current_actions())
-                elif fighters[0].animation_index > fighters[1].animation_index:
+                if fighters[0].animation_index > fighters[1].animation_index:
                     fighters[0].isDamaged = True
                     fighters[1].get_damage(fighters[0].get_current_actions())
                 elif fighters[0].animation_index < fighters[1].animation_index:

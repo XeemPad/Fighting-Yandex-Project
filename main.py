@@ -2,7 +2,7 @@
 
 import pygame
 import random
-import sys
+from subprocess import call
 
 # Константы:
 GAME_NAME = 'Kind of Fighting'
@@ -29,7 +29,7 @@ sounds_volume = 0.5
 
 def terminate():
     pygame.quit()
-    sys.exit()
+    exit()
 
 
 def start_game():
@@ -40,8 +40,9 @@ def start_game():
         background = random.choice(GAME_BACKGROUNDS)
         for line in [first_fighter, second_fighter, background]:
             cfg.write(line + '\n')
-    # Запуск скрипта с игровым процессом:
-    import launch_game
+    pygame.quit()
+    # Запуск игры:
+    call('python launch_game.py')
     terminate()
 
 
